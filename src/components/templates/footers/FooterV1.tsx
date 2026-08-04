@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -109,10 +109,10 @@ export default function FooterV1() {
   const rawFooterNav = settings?.footerNavigation && settings.footerNavigation.length > 0
     ? settings.footerNavigation
     : [
-      { label: 'Shop All', href: '/shop' },
-      { label: 'New Arrivals', href: '/shop?filter=new' },
-      { label: 'Order Tracking', href: '/track-order' },
-      { label: 'Contact Support', href: '/contact' }
+      { label: 'Home', href: '/' },
+      { label: 'About Us', href: '/about' },
+      { label: 'Services', href: '/#services' },
+      { label: 'Projects', href: '/#projects' }
     ];
   const footerNav = rawFooterNav.filter((link: any) => link.label !== 'Contact Support');
 
@@ -121,23 +121,11 @@ export default function FooterV1() {
       <div className="container mx-auto px-4 md:px-0">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
           <div className="flex flex-col items-center text-center md:items-start md:text-left gap-4 lg:col-span-2">
-            <Logo textClassName="text-xl md:text-2xl whitespace-nowrap" />
+            <Logo textClassName="text-[13px] sm:text-base md:text-2xl whitespace-nowrap truncate tracking-tighter" />
             <p className="text-sm text-muted-foreground w-full md:w-4/5">
-              If you can dream it, you can do it.
-              So, our dream is best clothing for our customers
+              Empowering global trade and construction with excellence, reliability, and international standards.
             </p>
 
-            {/* PWA Download App Button */}
-            {!isStandalone && (
-              <Button
-                onClick={handleInstallClick}
-                variant="outline"
-                className="mt-2 rounded-full border-neutral-300 dark:border-neutral-700 text-foreground hover:bg-primary hover:text-primary-foreground font-black text-[10px] tracking-widest gap-2 h-9 px-4 uppercase transition-all duration-300"
-              >
-                <Download className="h-3.5 w-3.5 animate-bounce" />
-                Download App
-              </Button>
-            )}
           </div>
 
           <div className="flex flex-col items-center text-center md:items-start md:text-left md:pt-3">
@@ -221,12 +209,12 @@ export default function FooterV1() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between border-t py-6 sm:flex-row text-sm text-muted-foreground gap-4">
-          <div className="flex flex-col sm:flex-row items-center gap-4">
+        <div className="mt-12 flex flex-col items-center justify-between border-t py-6 sm:flex-row text-sm text-muted-foreground gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
             <p>© {new Date().getFullYear()} {settings?.brandName || 'SS Ruma International Ltd'}. All rights reserved.</p>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center justify-center gap-6">
             <DeveloperLogo />
           </div>
         </div>

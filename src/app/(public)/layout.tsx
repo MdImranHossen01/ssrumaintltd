@@ -3,7 +3,6 @@ import Footer from '@/components/layout/Footer';
 import { getCachedSettings } from '@/lib/data-fetching';
 import { headers } from 'next/headers';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
-import { MobileBottomNavbar } from '@/components/layout/MobileBottomNavbar';
 import SubscriptionBlocker from '../components/SubscriptionBlocker';
 import { auth } from '@/auth';
 
@@ -37,10 +36,9 @@ export default async function PublicLayout({ children }: { children: React.React
     <>
       {showBlocker && <SubscriptionBlocker brandName={settings?.brandName || 'SS Ruma International Ltd'} />}
       <Navbar style={ui.navbar} />
-      <main className="flex-1 pb-16 md:pb-0">{children}</main>
+      <main className="flex-1">{children}</main>
       <Footer style={ui.footer} />
       <ScrollToTop />
-      <MobileBottomNavbar />
     </>
   );
 }

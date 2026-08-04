@@ -46,12 +46,12 @@ import {
 
 const navItems = [
   { href: '/#home', label: 'Home' },
-  { href: '/#about', label: 'About Us' },
+  { href: '/about', label: 'About Us' },
   { href: '/#services', label: 'Services' },
   { href: '/#certifications', label: 'Certifications' },
   { href: '/#projects', label: 'Projects' },
   { href: '/#gallery', label: 'Gallery' },
-  { href: '/#contact', label: 'Contact' },
+  { href: '/contact', label: 'Contact' },
 ];
 
 export default function Navbar() {
@@ -275,10 +275,10 @@ export default function Navbar() {
             </div>
 
             {/* Logo (Centered in desktop, Left-ish in mobile) */}
-            <div className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center justify-center">
+            <div className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center justify-center w-max max-w-[65vw]">
               <Logo
                 imageClassName="md:size-16"
-                textClassName="text-lg md:text-3xl whitespace-nowrap"
+                textClassName="text-[12px] sm:text-base md:text-3xl whitespace-nowrap truncate tracking-tighter"
                 sizes="(max-width: 768px) 24px, 64px"
               />
             </div>

@@ -13,27 +13,21 @@ import {
   Clock, 
   Users, 
   DollarSign, 
-  Sparkles, 
   Milestone,
   CheckCircle,
   Mail,
   Phone,
   MapPin,
-  Globe2,
-  Lock
+  Globe2
 } from 'lucide-react';
-import Image from 'next/image';
-import connectToDatabase from '@/lib/db';
-import GlobalSettings from '@/models/GlobalSettings';
-import dynamic from 'next/dynamic';
 import { headers } from 'next/headers';
 import { getCachedSettings } from '@/lib/data-fetching';
 
 import CertificationsList from '@/components/corporate/CertificationsList';
 import ProjectsGallery from '@/components/corporate/ProjectsGallery';
-
 import ContactForm from '@/components/corporate/ContactForm';
 import { SyncedHeroSection } from '@/components/storefront/SyncedHeroSection';
+import { MediaGallerySection } from '@/components/corporate/MediaGallerySection';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getCachedSettings();
@@ -146,7 +140,6 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Service 1 */}
             <div className="group bg-card/40 border border-border/80 hover:border-primary/50 p-8 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
               <div className="p-3 bg-primary/10 text-primary rounded-xl w-fit mb-6 transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
                 <Building2 className="h-6 w-6" />
@@ -157,7 +150,6 @@ export default async function HomePage() {
               </p>
             </div>
 
-            {/* Service 2 */}
             <div className="group bg-card/40 border border-border/80 hover:border-primary/50 p-8 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
               <div className="p-3 bg-primary/10 text-primary rounded-xl w-fit mb-6 transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
                 <Globe className="h-6 w-6" />
@@ -168,7 +160,6 @@ export default async function HomePage() {
               </p>
             </div>
 
-            {/* Service 3 */}
             <div className="group bg-card/40 border border-border/80 hover:border-primary/50 p-8 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
               <div className="p-3 bg-primary/10 text-primary rounded-xl w-fit mb-6 transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
                 <FileSpreadsheet className="h-6 w-6" />
@@ -179,7 +170,6 @@ export default async function HomePage() {
               </p>
             </div>
 
-            {/* Service 4 */}
             <div className="group bg-card/40 border border-border/80 hover:border-primary/50 p-8 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
               <div className="p-3 bg-primary/10 text-primary rounded-xl w-fit mb-6 transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
                 <Truck className="h-6 w-6" />
@@ -190,7 +180,6 @@ export default async function HomePage() {
               </p>
             </div>
 
-            {/* Service 5 */}
             <div className="group bg-card/40 border border-border/80 hover:border-primary/50 p-8 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
               <div className="p-3 bg-primary/10 text-primary rounded-xl w-fit mb-6 transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
                 <Anchor className="h-6 w-6" />
@@ -201,7 +190,6 @@ export default async function HomePage() {
               </p>
             </div>
 
-            {/* Service 6 */}
             <div className="group bg-card/40 border border-border/80 hover:border-primary/50 p-8 rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
               <div className="p-3 bg-primary/10 text-primary rounded-xl w-fit mb-6 transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
                 <Plane className="h-6 w-6" />
@@ -228,7 +216,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { icon: Users, title: 'Professional Team', desc: 'Expert personnel ensuring execution success.' },
-              { icon: Shield, title: 'Registered Company', desc: 'Fully government registered and compliant.' },
+              { icon: Shield, title: 'Government Registered Company', desc: 'Fully government registered and compliant.' },
               { icon: Award, title: 'Quality Assurance', desc: 'Premium materials and execution standards.' },
               { icon: Clock, title: 'Fast Service', desc: 'Strict commitment to timeframes.' },
               { icon: DollarSign, title: 'Competitive Pricing', desc: 'Cost-efficient and budget-friendly operations.' },
@@ -280,7 +268,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-
+      {/* 7. Media Gallery (Interactive 3D Globe) */}
+      <MediaGallerySection />
 
       {/* 8. Clients & Partners */}
       <section id="partners" className="py-12 border-b border-border bg-card/5">
@@ -298,78 +287,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 9. Contact Us */}
-      <section id="contact" className="py-20 md:py-28 bg-background">
-        <div className="container mx-auto px-4 max-w-6xl space-y-16">
-          <div className="text-center max-w-2xl mx-auto space-y-4">
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
-              Contact Us
-            </h2>
-            <div className="h-1 w-12 bg-primary mx-auto rounded-full" />
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* Info + Map */}
-            <div className="space-y-8">
-              <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-foreground">Get In Touch</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  Have questions about our services or a business proposal? Fill out the contact form or visit our corporate headquarters in Dhaka.
-                </p>
-              </div>
-
-              <div className="space-y-4 text-sm font-medium">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-primary/10 text-primary rounded-xl mt-0.5">
-                    <MapPin className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-foreground text-xs uppercase tracking-wider mb-1">Head Office</h5>
-                    <p className="text-muted-foreground">{settings?.contact?.address || '2nd floor, Jaman Tower, Dhaka-1000, Bangladesh'}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-primary/10 text-primary rounded-xl mt-0.5">
-                    <Phone className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-foreground text-xs uppercase tracking-wider mb-1">Phone</h5>
-                    <p className="text-muted-foreground">{settings?.contact?.phone || '+880 1911-170535, +880 1711257673'}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-primary/10 text-primary rounded-xl mt-0.5">
-                    <Mail className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-foreground text-xs uppercase tracking-wider mb-1">Email</h5>
-                    <p className="text-muted-foreground">{settings?.contact?.email || 'info@ssrumaintltd.com'}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Map */}
-              <div className="w-full aspect-video rounded-2xl overflow-hidden border border-border shadow-md">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3652.569420067645!2d90.41249767623956!3d23.72709237868779!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b85a3c6dfd2b%3A0xc48de27d091e779a!2sJaman%20Tower!5e0!3m2!1sen!2sbd!4v1700000000000!5m2!1sen!2sbd"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="S S RUMA INTERNATIONAL LTD Location Map"
-                />
-              </div>
-            </div>
-
-            {/* Contact Form */}
-            <ContactForm />
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
