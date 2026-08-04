@@ -1,6 +1,5 @@
-﻿import Navbar from '@/components/layout/Navbar';
+import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { Marquee } from '@/components/layout/Marquee';
 import { getCachedSettings } from '@/lib/data-fetching';
 import { headers } from 'next/headers';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
@@ -27,7 +26,7 @@ export default async function PublicLayout({ children }: { children: React.React
   // Only show blocker if expired and NOT a super admin
   const showBlocker = isExpired && !isSuperAdmin;
 
-  const marqueeText = settings?.marqueeText || 'Welcome to Rumas World! Free shipping on orders over $500.';
+  const marqueeText = settings?.marqueeText || 'Welcome to SS Ruma International Ltd! Free shipping on orders over $500.';
   const ui = {
     layout: settings?.uiTemplates?.layout || 'v1',
     navbar: settings?.uiTemplates?.navbar || 'v1',
@@ -36,8 +35,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
   return (
     <>
-      {showBlocker && <SubscriptionBlocker brandName={settings?.brandName || 'Rumas World'} />}
-      {ui.layout !== 'v2' && <Marquee marqueeText={marqueeText} />}
+      {showBlocker && <SubscriptionBlocker brandName={settings?.brandName || 'SS Ruma International Ltd'} />}
       <Navbar style={ui.navbar} />
       <main className="flex-1 pb-16 md:pb-0">{children}</main>
       <Footer style={ui.footer} />

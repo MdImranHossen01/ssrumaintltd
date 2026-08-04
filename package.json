@@ -1,5 +1,5 @@
 {
-  "name": "Climax Apparels",
+  "name": "SS Ruma International Ltd",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -49,6 +49,7 @@
     "@tiptap/starter-kit": "^3.22.3",
     "@types/recharts": "^1.8.29",
     "@types/uuid": "^10.0.0",
+    "@use-gesture/react": "^10.3.1",
     "aos": "^2.3.4",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",

@@ -425,7 +425,7 @@ export default function NavbarAarong() {
               <Link href="/" className="relative block w-[85px] h-[85px] transition-transform hover:scale-105">
                 <Image
                   src={settings.logoUrl || "/logo.webp"}
-                  alt={`${settings.brandName || "Rumas World"} Logo`}
+                  alt={`${settings.brandName || "SS Ruma International Ltd"} Logo`}
                   fill
                   sizes="85px"
                   className="object-contain"

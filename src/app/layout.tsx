@@ -102,21 +102,21 @@ export async function generateMetadata(): Promise<Metadata> {
       appleWebApp: {
         capable: true,
         statusBarStyle: 'default',
-        title: settings.brandName || "Rumas World",
+        title: settings.brandName || "SS Ruma International Ltd",
       },
       formatDetection: {
         telephone: false,
       },
       openGraph: {
-        title: settings.metaTitle || settings.brandName || "Rumas World",
+        title: settings.metaTitle || settings.brandName || "SS Ruma International Ltd",
         description: settings.metaDescription || settings.brandName || "Your ultimate destination for quality products.",
         url: baseUrl,
-        siteName: settings.brandName || "Rumas World",
+        siteName: settings.brandName || "SS Ruma International Ltd",
         type: 'website',
       },
       twitter: {
         card: 'summary_large_image',
-        title: settings.metaTitle || settings.brandName || "Rumas World",
+        title: settings.metaTitle || settings.brandName || "SS Ruma International Ltd",
         description: settings.metaDescription || settings.brandName || "Your ultimate destination for quality products.",
       },
       verification: {
@@ -133,7 +133,7 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   } catch (error) {
     return {
-      title: "Rumas World",
+      title: "SS Ruma International Ltd",
       description: "Your ultimate destination for quality products.",
     };
   }

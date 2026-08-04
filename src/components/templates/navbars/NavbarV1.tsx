@@ -8,17 +8,12 @@ import {
   ShoppingCart,
   Heart,
   User,
-  Search,
   Menu,
-  Mic,
-  MicOff,
   LayoutDashboard,
   LogOut,
   Settings,
   Package,
   Truck,
-  HelpCircle,
-  ChevronDown
 } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import { toast } from 'sonner';
@@ -47,13 +42,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import Swal from 'sweetalert2';
+
 
 const navItems = [
-  { href: '/', label: 'Home' },
-  { href: '/shop', label: 'Shop' },
-  { href: '/blog', label: 'Blogs' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/#home', label: 'Home' },
+  { href: '/#about', label: 'About Us' },
+  { href: '/#services', label: 'Services' },
+  { href: '/#certifications', label: 'Certifications' },
+  { href: '/#projects', label: 'Projects' },
+  { href: '/#gallery', label: 'Gallery' },
+  { href: '/#contact', label: 'Contact' },
 ];
 
 export default function Navbar() {
@@ -180,11 +178,12 @@ export default function Navbar() {
 
   const handleResultClick = () => { setShowDropdown(false); setSearchTerm(''); setLiveResults([]); };
 
-  const handleVoiceSearch = () => {
+  const handleVoiceSearch = async () => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
+      const Swal = (await import('sweetalert2')).default;
       Swal.fire({
         title: 'Voice Search Unsupported',
         text: 'Voice search is not supported in your browser. Please use Google Chrome for the best experience.',
@@ -237,79 +236,8 @@ export default function Navbar() {
           {/* Middle Main Row: Search | Logo | Icons */}
           <div className="relative flex h-14 md:h-20 items-center justify-between px-1 md:px-6 border-b border-muted/30">
 
-            {/* Desktop Search (Left) */}
-            <div ref={searchContainerRef} className="hidden md:flex flex-1 items-center max-w-[280px] relative">
-              <form onSubmit={handleSearch} className="relative w-full group">
-                <label htmlFor="navbar-search" className="sr-only">Search products</label>
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
-                <input
-                  id="navbar-search"
-                  type="text"
-                  placeholder={isListening ? 'Listening...' : 'Search products...'}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onFocus={() => { if (liveResults.length > 0) setShowDropdown(true); }}
-                  aria-label="Search products"
-                  autoComplete="off"
-                  className="w-full bg-muted/40 border-none rounded-full py-2.5 pl-10 pr-10 text-xs focus:ring-1 focus:ring-primary/20 transition-all outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={handleVoiceSearch}
-                  title={isListening ? 'Stop listening' : 'Search by voice'}
-                  aria-label={isListening ? 'Stop listening' : 'Search by voice'}
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-muted-foreground hover:text-primary'}`}
-                >
-                  {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                </button>
-              </form>
-              {showDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-2xl shadow-xl z-50 overflow-hidden">
-                  {isSearching ? (
-                    <div className="flex items-center justify-center py-6 gap-2 text-muted-foreground text-xs">
-                      <div className="h-3 w-3 rounded-full border-2 border-primary border-t-transparent animate-spin" /> Searching...
-                    </div>
-                  ) : liveResults.length > 0 ? (
-                    <>
-                      <ul className="divide-y divide-border/50">
-                        {liveResults.map((product) => {
-                          const price = product.salePrice ?? product.price;
-                          const image = product.images?.[0];
-                          return (
-                            <li key={product._id}>
-                              <Link href={`/products/${product.slug}`} onClick={handleResultClick} className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/50 transition-colors group">
-                                {image ? (
-                                  <div className="h-10 w-10 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
-                                    <Image src={image} alt={product.name} width={40} height={40} className="h-full w-full object-cover" />
-                                  </div>
-                                ) : (
-                                  <div className="h-10 w-10 rounded-lg bg-muted flex-shrink-0 flex items-center justify-center">
-                                    <Search className="h-4 w-4 text-muted-foreground" />
-                                  </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-semibold truncate group-hover:text-primary transition-colors">{product.name}</p>
-                                  <p className="text-[11px] text-primary font-bold">৳{price?.toLocaleString()}</p>
-                                </div>
-                              </Link>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                      <div className="border-t border-border/50 px-4 py-2.5">
-                        <Link href={`/shop?search=${encodeURIComponent(searchTerm.trim())}`} onClick={handleResultClick} className="flex items-center justify-center gap-1.5 text-xs font-semibold text-primary hover:underline">
-                          <Search className="h-3 w-3" /> See all results for &ldquo;{searchTerm}&rdquo;
-                        </Link>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center py-6 text-muted-foreground text-xs gap-1">
-                      <Search className="h-5 w-5 mb-1 opacity-40" /> No results found for &ldquo;{searchTerm}&rdquo;
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            {/* Desktop Search Placeholder Spacer */}
+            <div className="hidden md:block flex-1 max-w-[280px]" />
 
             {/* Mobile Menu Trigger */}
             <div className="flex md:hidden items-center">
@@ -336,26 +264,7 @@ export default function Navbar() {
                             >
                               {item.label}
                             </Link>
-                            {/* Insert Categories Accordion after Home (index 0) */}
-                            {index === 0 && (
-                              <Accordion type="single" collapsible>
-                                <AccordionItem value="cats" className="border-none">
-                                  <AccordionTrigger className="py-2 hover:no-underline uppercase text-[12px] font-bold tracking-[0.2em] text-left">Categories</AccordionTrigger>
-                                  <AccordionContent className="pt-2 pl-4 flex flex-col gap-3">
-                                    {mainCategories.map(cat => (
-                                      <Link
-                                        key={cat._id}
-                                        href={`/shop?category=${cat.slug}`}
-                                        onClick={() => setOpen(false)}
-                                        className="hover:text-primary text-[11px] font-bold uppercase tracking-[0.1em]"
-                                      >
-                                        {cat.name}
-                                      </Link>
-                                    ))}
-                                  </AccordionContent>
-                                </AccordionItem>
-                              </Accordion>
-                            )}
+                            {/* Categories Accordion Removed */}
                           </React.Fragment>
                         );
                       })}
@@ -367,9 +276,9 @@ export default function Navbar() {
 
             {/* Logo (Centered in desktop, Left-ish in mobile) */}
             <div className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center justify-center">
-              <Logo 
-                imageClassName="md:size-16" 
-                textClassName="text-lg md:text-3xl whitespace-nowrap" 
+              <Logo
+                imageClassName="md:size-16"
+                textClassName="text-lg md:text-3xl whitespace-nowrap"
                 sizes="(max-width: 768px) 24px, 64px"
               />
             </div>
@@ -384,50 +293,7 @@ export default function Navbar() {
 
 
 
-              {/* Wishlist */}
-              <Link
-                href="/dashboard/wishlist"
-                className="hidden sm:flex h-10 w-10 items-center justify-center rounded-xl transition-all cursor-pointer hover:text-primary hover:scale-110"
-                aria-label="Wishlist"
-                onClick={(e) => {
-                  if (status !== 'authenticated') {
-                    e.preventDefault();
-                    toast.error('Please login to view your wishlist');
-                  }
-                }}
-              >
-                <div className="relative">
-                  <Heart className="h-5 w-5" />
-                  {wishlistItems.length > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 h-3.5 w-3.5 bg-primary text-[8px] font-bold text-white flex items-center justify-center rounded-full shadow-sm animate-in fade-in zoom-in duration-300">
-                      {wishlistItems.length}
-                    </span>
-                  )}
-                </div>
-              </Link>
-
-              {/* Cart */}
-              <div className="hidden md:block">
-                <CartDrawer>
-                  <div
-                    className="flex items-center gap-2 group cursor-pointer hover:text-primary px-2 py-1.5 rounded-full transition-all hover:scale-110 active:scale-95"
-                    aria-label="Shopping Cart"
-                    role="button"
-                  >
-                    <div className="relative">
-                      <ShoppingCart className="h-5 w-5 stroke-[1.5]" />
-                      {cartCount > 0 && (
-                        <span className="absolute -top-2 -right-2 h-4 w-4 bg-primary text-white text-[8px] font-black rounded-full flex items-center justify-center animate-in zoom-in">
-                          {cartCount}
-                        </span>
-                      )}
-                    </div>
-                    <div className="hidden lg:flex flex-col text-left">
-                      <span className="text-[10px] font-bold leading-none tracking-tighter">৳{totalAmount.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </CartDrawer>
-              </div>
+              {/* Wishlist & Cart Removed for Corporate Site */}
 
               {/* User Account (Right end) */}
               <div className="hidden md:flex items-center">
@@ -558,12 +424,7 @@ export default function Navbar() {
                       {item.label}
                     </Link>
                   </li>
-                  {/* Insert CategoryNav after Home (index 0) */}
-                  {index === 0 && (
-                    <li className="flex items-center h-full">
-                      <CategoryNav />
-                    </li>
-                  )}
+                  {/* CategoryNav Dropdown Removed */}
                 </React.Fragment>
               );
             })}

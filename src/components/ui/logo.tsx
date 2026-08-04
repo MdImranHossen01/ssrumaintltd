@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from 'react';
 import Link from 'next/link';
@@ -19,7 +19,7 @@ interface LogoProps {
 export function Logo({ className, imageClassName, textClassName, showText = true, onClick, sizes, src }: LogoProps) {
   const { brandName, logoUrl } = useSettings();
 
-  const finalBrandName = brandName || "Rumas World";
+  const finalBrandName = brandName || "SS Ruma International Ltd";
   const finalLogoUrl = src || logoUrl || "/logo.webp";
 
   return (
@@ -46,4 +46,6 @@ export function Logo({ className, imageClassName, textClassName, showText = true
     </Link>
   );
 }
+
+
 
