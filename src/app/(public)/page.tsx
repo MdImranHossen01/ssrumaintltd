@@ -28,6 +28,8 @@ import ProjectsGallery from '@/components/corporate/ProjectsGallery';
 import ContactForm from '@/components/corporate/ContactForm';
 import { SyncedHeroSection } from '@/components/storefront/SyncedHeroSection';
 import { MediaGallerySection } from '@/components/corporate/MediaGallerySection';
+import { AnimatedTestimonialsDemo } from '@/components/AnimatedTestimonialsDemo';
+import { CompareDemo } from '@/components/CompareDemo';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getCachedSettings();
@@ -268,10 +270,39 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 7. Media Gallery (Interactive 3D Globe) */}
+      {/* 7. Project Transformation (Compare) */}
+      <section id="transformation" className="py-20 md:py-28 bg-background border-b border-border">
+        <div className="container mx-auto px-4 max-w-6xl space-y-16">
+          <div className="text-center max-w-2xl mx-auto space-y-4">
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
+              Project Transformation
+            </h2>
+            <div className="h-1 w-12 bg-primary mx-auto rounded-full" />
+            <p className="text-muted-foreground">See the difference we make, from start to finish.</p>
+          </div>
+
+          <CompareDemo />
+        </div>
+      </section>
+
+      {/* 8. Media Gallery (Interactive 3D Globe) */}
       <MediaGallerySection />
 
-      {/* 8. Clients & Partners */}
+      {/* 8. Testimonials */}
+      <section id="testimonials" className="py-20 md:py-28 bg-background border-b border-border">
+        <div className="container mx-auto px-4 max-w-6xl space-y-8">
+          <div className="text-center max-w-2xl mx-auto space-y-4">
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
+              What Our Clients Say
+            </h2>
+            <div className="h-1 w-12 bg-primary mx-auto rounded-full" />
+          </div>
+
+          <AnimatedTestimonialsDemo />
+        </div>
+      </section>
+
+      {/* 9. Clients & Partners */}
       <section id="partners" className="py-12 border-b border-border bg-card/5">
         <div className="container mx-auto px-4 max-w-6xl">
           <h4 className="text-center text-xs font-bold uppercase tracking-widest text-muted-foreground mb-8">
