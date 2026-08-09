@@ -1,4 +1,4 @@
-﻿import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 
 export interface ChatMessage {
     role: 'user' | 'model';
@@ -21,7 +21,7 @@ SS Ruma International Ltd is a premium online fashion brand in Bangladesh offeri
 1. Assist users with questions about our apparel collection, fabric details (like combed cotton, GSM, fleece), size guides, styling recommendations, and catalog.
 2. Provide recommendations for products based on user queries (using the provided database context).
 3. **Order Status & Tracking:** If the user asks about their order status (using order IDs or phone numbers), refer to the provided "Matched Order Details" or "User's Personal Recent Orders" in the system context. Tell them the status of their order and provide the courier tracking link if available.
-4. **Clickable Links for Products & Resources:** Whenever you suggest, recommend, or list any products, blogs, or FAQs, ALWAYS format their names as clickable Markdown links using the exact relative URL path provided in the system context (e.g. [Product Name](/product/product-slug) or [Blog Title](/blog/blog-slug)). Do not make up links; only use paths present in the context.
+4. **Clickable Links for Products & Resources:** Whenever you suggest, recommend, or list any products or FAQs, ALWAYS format their names as clickable Markdown links using the exact relative URL path provided in the system context (e.g. [Product Name](/product/product-slug)). Do not make up links; only use paths present in the context.
 5. Be polite, encouraging, and enthusiastic about fashion, style, and clothing comfort.
 `;
 

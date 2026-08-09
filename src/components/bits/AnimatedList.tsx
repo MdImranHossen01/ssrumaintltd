@@ -16,18 +16,15 @@ const AnimatedItem = ({ children, delay = 0, index, onMouseEnter, onClick }: Ani
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: 0.5, once: false });
   return (
-    <motion.div
+    <div
       ref={ref}
       data-index={index}
       onMouseEnter={onMouseEnter}
       onClick={onClick}
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={inView ? { scale: 1, opacity: 1 } : { scale: 0.9, opacity: 0 }}
-      transition={{ duration: 0.3, delay, ease: "easeOut" }}
       className="relative mb-4 cursor-pointer"
     >
       {children}
-    </motion.div>
+    </div>
   );
 };
 
@@ -144,7 +141,7 @@ const AnimatedList = ({
             >
               <div className={`item group ${isSelected ? 'selected' : ''} ${itemClassName}`}>
                 <div className="flex justify-between items-center gap-4">
-                  <p className="item-text text-foreground transition-colors group-hover:text-primary">{displayTitle}</p>
+                  <p className="item-text text-black dark:text-white transition-colors group-hover:text-primary">{displayTitle}</p>
                   <motion.div
                     animate={{ rotate: isSelected ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
@@ -187,4 +184,3 @@ const AnimatedList = ({
 };
 
 export default AnimatedList;
-

@@ -1,4 +1,4 @@
-﻿import { headers } from 'next/headers';
+import { headers } from 'next/headers';
 
 async function getBaseUrl() {
   const headersList = await headers();
@@ -67,21 +67,4 @@ export function generateBreadcrumbSchema(items: { name: string; item: string }[]
   };
 }
 
-export async function generateBlogSchema(blog: any) {
-  const baseUrl = await getBaseUrl();
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: blog.title,
-    image: blog.thumbnail ? [blog.thumbnail] : [],
-    datePublished: blog.createdAt,
-    dateModified: blog.updatedAt || blog.createdAt,
-    author: {
-      '@type': 'Organization',
-      name: 'SS Ruma International Ltd',
-    },
-    description: blog.metaDescription || blog.title,
-    url: `${baseUrl}/blog/${blog.slug}`,
-  };
-}
 

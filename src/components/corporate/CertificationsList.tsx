@@ -63,24 +63,7 @@ export default function CertificationsList() {
               </p>
             </div>
 
-            <div className="flex items-center gap-3 mt-auto">
-              {cert.status !== 'Upcoming' ? (
-                <button
-                  onClick={() => handleDownload(cert)}
-                  className="w-full inline-flex items-center justify-center gap-2 text-xs font-semibold py-2 px-3 rounded-lg bg-primary/10 hover:bg-primary hover:text-primary-foreground text-primary transition-all duration-200"
-                  title="Download PDF"
-                >
-                  <Download className="h-3.5 w-3.5" /> Download PDF
-                </button>
-              ) : (
-                <button
-                  disabled
-                  className="w-full inline-flex items-center justify-center gap-2 text-xs font-semibold py-2 px-3 rounded-lg bg-muted text-muted-foreground/50 cursor-not-allowed"
-                >
-                  Coming Soon
-                </button>
-              )}
-            </div>
+
           </div>
         ))}
       </div>

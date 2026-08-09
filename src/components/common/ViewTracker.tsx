@@ -5,7 +5,7 @@ import { trackView } from '@/app/actions/view-tracking';
 
 interface ViewTrackerProps {
   id: string;
-  type: 'product' | 'blog';
+  type: 'product';
 }
 
 export function ViewTracker({ id, type }: ViewTrackerProps) {

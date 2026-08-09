@@ -143,21 +143,7 @@ const data = {
         },
       ],
     },
-    {
-      title: "Blogs",
-      url: "#",
-      icon: FileText,
-      items: [
-        {
-          title: "Manage Blog",
-          url: "/admin/blogs",
-        },
-        {
-          title: "Add New Blog",
-          url: "/admin/blogs/new",
-        },
-      ],
-    },
+
     {
       title: "System Settings",
       url: "#",

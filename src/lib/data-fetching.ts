@@ -3,7 +3,6 @@ import connectToDatabase from './db';
 import Product from '@/models/Product';
 import Category from '@/models/Category';
 import Banner from '@/models/Banner';
-import Blog from '@/models/Blog';
 import FAQ from '@/models/FAQ';
 import GlobalSettings from '@/models/GlobalSettings';
 import Coupon from '@/models/Coupon';
@@ -19,7 +18,6 @@ export const CACHE_TAGS = {
   products: 'products',
   categories: 'categories',
   banners: 'banners',
-  blogs: 'blogs',
   faqs: 'faqs',
   settings: 'settings',
   coupons: 'coupons',
@@ -169,35 +167,6 @@ export const getCachedBanners = () => {
     },
     ['banners-list'],
     { revalidate: 60, tags: [CACHE_TAGS.banners] }
-  )();
-};
-
-// --- BLOGS ---
-
-export const getCachedBlogs = (limit = 10) => {
-  return unstable_cache(
-    async () => {
-      await connectToDatabase();
-      const blogs = await Blog.find({ isPublished: true })
-        .sort({ createdAt: -1 })
-        .limit(limit)
-        .lean();
-      return serialize(blogs);
-    },
-    ['blogs-list', limit.toString()],
-    { revalidate: 31536000, tags: [CACHE_TAGS.blogs] }
-  )();
-};
-
-export const getCachedBlogBySlug = (slug: string) => {
-  return unstable_cache(
-    async () => {
-      await connectToDatabase();
-      const blog = await Blog.findOne({ slug, isPublished: true }).lean();
-      return serialize(blog);
-    },
-    ['blog-detail', slug],
-    { revalidate: 31536000, tags: [CACHE_TAGS.blogs] }
   )();
 };
 

@@ -3,7 +3,6 @@ import { headers } from "next/headers";
 import connectToDatabase from "@/lib/db";
 import Product from "@/models/Product";
 import Category from "@/models/Category";
-import Blog from "@/models/Blog";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +10,7 @@ const getDynamicRoutes = async (baseUrl: string): Promise<MetadataRoute.Sitemap>
   try {
     await connectToDatabase();
 
-    const [products, categories, blogs] = await Promise.all([
+    const [products, categories] = await Promise.all([
       Product.find({ isPublished: true }, "slug updatedAt")
         .sort({ updatedAt: -1 })
         .limit(40000)
@@ -20,11 +19,6 @@ const getDynamicRoutes = async (baseUrl: string): Promise<MetadataRoute.Sitemap>
       Category.find({ isActive: true }, "slug updatedAt")
         .sort({ updatedAt: -1 })
         .limit(5000)
-        .lean()
-        .exec(),
-      Blog.find({ isPublished: true }, "slug updatedAt")
-        .sort({ updatedAt: -1 })
-        .limit(4000)
         .lean()
         .exec(),
     ]);
@@ -43,17 +37,9 @@ const getDynamicRoutes = async (baseUrl: string): Promise<MetadataRoute.Sitemap>
       priority: 0.7,
     }));
 
-    const blogRoutes: MetadataRoute.Sitemap = blogs.map((item: any) => ({
-      url: `${baseUrl}/blog/${item.slug}`,
-      lastModified: item.updatedAt || new Date(),
-      changeFrequency: "weekly",
-      priority: 0.6,
-    }));
-
     return [
       ...productRoutes,
       ...categoryRoutes,
-      ...blogRoutes,
     ];
   } catch (error) {
     console.error("Error generating dynamic sitemap routes:", error);
@@ -84,12 +70,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/blog`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.7,
     },
     {
       url: `${baseUrl}/about`,
