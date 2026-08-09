@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { FileText, Eye, Download, Award, X } from 'lucide-react';
+import { FileText, Download, Award, X } from 'lucide-react';
 
 interface Certificate {
   id: string;
@@ -9,15 +9,16 @@ interface Certificate {
   desc: string;
   status: string;
   mockUrl: string;
+  regNo: string;
 }
 
 const certificates: Certificate[] = [
-  { id: 'trade-license', name: 'Trade License', desc: 'Official government license authorizing corporate business operations.', status: 'Active', mockUrl: '/assets/docs/trade-license-mock.pdf' },
-  { id: 'tin', name: 'TIN Certificate', desc: 'Taxpayer Identification Number registration issued by the NBR.', status: 'Active', mockUrl: '/assets/docs/tin-mock.pdf' },
-  { id: 'bin-vat', name: 'BIN/VAT Registration', desc: 'Business Identification Number for value added tax compliance.', status: 'Active', mockUrl: '/assets/docs/bin-mock.pdf' },
-  { id: 'rjsc', name: 'RJSC Certificate', desc: 'Certificate of incorporation registered under the Registrar of Joint Stock Companies.', status: 'Active', mockUrl: '/assets/docs/rjsc-mock.pdf' },
-  { id: 'membership', name: 'Membership Certificates', desc: 'Official trade association and chambers of commerce certificates.', status: 'Active', mockUrl: '/assets/docs/membership-mock.pdf' },
-  { id: 'iso', name: 'ISO Certificate', desc: 'International Organization for Standardization compliance quality certificate.', status: 'Upcoming', mockUrl: '#' },
+  { id: 'trade-license', name: 'Trade License', desc: 'Official government license authorizing corporate business operations.', status: 'Active', mockUrl: '/assets/docs/trade-license-mock.pdf', regNo: 'SSR-2026-84920' },
+  { id: 'tin', name: 'TIN Certificate', desc: 'Taxpayer Identification Number registration issued by the NBR.', status: 'Active', mockUrl: '/assets/docs/tin-mock.pdf', regNo: 'SSR-2026-10492' },
+  { id: 'bin-vat', name: 'BIN/VAT Registration', desc: 'Business Identification Number for value added tax compliance.', status: 'Active', mockUrl: '/assets/docs/bin-mock.pdf', regNo: 'SSR-2026-95821' },
+  { id: 'rjsc', name: 'RJSC Certificate', desc: 'Certificate of incorporation registered under the Registrar of Joint Stock Companies.', status: 'Active', mockUrl: '/assets/docs/rjsc-mock.pdf', regNo: 'SSR-2026-48301' },
+  { id: 'membership', name: 'Membership Certificates', desc: 'Official trade association and chambers of commerce certificates.', status: 'Active', mockUrl: '/assets/docs/membership-mock.pdf', regNo: 'SSR-2026-72948' },
+  { id: 'iso', name: 'ISO Certificate', desc: 'International Organization for Standardization compliance quality certificate.', status: 'Upcoming', mockUrl: '#', regNo: 'SSR-2026-38491' },
 ];
 
 export default function CertificationsList() {
@@ -47,11 +48,10 @@ export default function CertificationsList() {
                 <div className="p-3 bg-primary/10 text-primary rounded-xl transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
                   <Award className="h-6 w-6" />
                 </div>
-                <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
-                  cert.status === 'Active' 
-                    ? 'bg-emerald-500/10 text-emerald-500' 
+                <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${cert.status === 'Active'
+                    ? 'bg-emerald-500/10 text-emerald-500'
                     : 'bg-amber-500/10 text-amber-500'
-                }`}>
+                  }`}>
                   {cert.status}
                 </span>
               </div>
@@ -65,21 +65,13 @@ export default function CertificationsList() {
 
             <div className="flex items-center gap-3 mt-auto">
               {cert.status !== 'Upcoming' ? (
-                <>
-                  <button
-                    onClick={() => setSelectedCert(cert)}
-                    className="flex-1 inline-flex items-center justify-center gap-2 text-xs font-semibold py-2 px-3 rounded-lg bg-primary/10 hover:bg-primary hover:text-primary-foreground text-primary transition-all duration-200"
-                  >
-                    <Eye className="h-3.5 w-3.5" /> View PDF
-                  </button>
-                  <button
-                    onClick={() => handleDownload(cert)}
-                    className="inline-flex items-center justify-center p-2 rounded-lg bg-muted hover:bg-neutral-800 text-muted-foreground hover:text-white transition-all duration-200"
-                    title="Download PDF"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                  </button>
-                </>
+                <button
+                  onClick={() => handleDownload(cert)}
+                  className="w-full inline-flex items-center justify-center gap-2 text-xs font-semibold py-2 px-3 rounded-lg bg-primary/10 hover:bg-primary hover:text-primary-foreground text-primary transition-all duration-200"
+                  title="Download PDF"
+                >
+                  <Download className="h-3.5 w-3.5" /> Download PDF
+                </button>
               ) : (
                 <button
                   disabled
@@ -121,7 +113,7 @@ export default function CertificationsList() {
                 </div>
 
                 <div className="my-8 space-y-3 text-xs text-neutral-600 pl-8 relative z-10">
-                  <p><strong>Registration No:</strong> SSR-2026-{(Math.random() * 100000).toFixed(0)}</p>
+                  <p><strong>Registration No:</strong> {selectedCert.regNo}</p>
                   <p><strong>Issued Authority:</strong> Government of the People&apos;s Republic of Bangladesh</p>
                   <p><strong>Status:</strong> Active / Verified Compliance</p>
                   <p><strong>Verification Date:</strong> August 4, 2026</p>

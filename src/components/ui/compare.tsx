@@ -2,8 +2,12 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { SparklesCore } from "@/components/ui/sparkles";
 import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { IconDotsVertical } from "@tabler/icons-react";
+
+const MotionImage = motion.create ? motion.create(Image) : motion(Image);
+
 
 interface CompareProps {
   firstImage?: string;
@@ -207,7 +211,7 @@ export const Compare = ({
               }}
               transition={{ duration: 0 }}
             >
-              <img
+              <Image
                 alt="first image"
                 src={firstImage}
                 className={cn(
@@ -215,6 +219,7 @@ export const Compare = ({
                   firstImageClassName
                 )}
                 draggable={false}
+                fill
               />
             </motion.div>
           ) : null}
@@ -223,7 +228,7 @@ export const Compare = ({
 
       <AnimatePresence initial={false}>
         {secondImage ? (
-          <motion.img
+          <MotionImage
             className={cn(
               "absolute top-0 left-0 z-[19]  rounded-2xl w-full h-full select-none",
               secondImageClassname
@@ -231,6 +236,7 @@ export const Compare = ({
             alt="second image"
             src={secondImage}
             draggable={false}
+            fill
           />
         ) : null}
       </AnimatePresence>
