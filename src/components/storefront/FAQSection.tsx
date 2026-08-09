@@ -1,16 +1,13 @@
 'use client';
 
-import { Badge } from "@/components/ui/badge";
-import { HelpCircle, ArrowRight, MessageCircle } from "lucide-react";
-import Link from "next/link";
+import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import AnimatedList from "../bits/AnimatedList";
-import faqAnimation from "../../../public/assets/ecomfaq.json";
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageCircle, HelpCircle, Plus, Minus } from 'lucide-react';
 
 // Dynamic import for Lottie to avoid SSR issues
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
+import faqAnimation from '../../../public/assets/ecomfaq.json';
 
 interface FAQItem {
     question: string;
@@ -18,10 +15,12 @@ interface FAQItem {
 }
 
 export function FAQSection({ faqs: dynamicFaqs }: { faqs?: FAQItem[] }) {
-    const faqs: FAQItem[] = [
+    const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+    const staticFaqs: FAQItem[] = [
         {
             question: "What services does SS Ruma International Ltd provide?",
-            answer: "We offer a wide range of professional services and solutions tailored to meet your business needs. Please check our 'Services' page for detailed information."
+            answer: "We offer a wide range of professional services and solutions tailored to meet your business needs, including construction, international trade, import & export, and business consultancy."
         },
         {
             question: "How can I contact your support team?",
@@ -41,80 +40,140 @@ export function FAQSection({ faqs: dynamicFaqs }: { faqs?: FAQItem[] }) {
         }
     ];
 
-    return (
-        <section className="py-12 md:py-20 relative overflow-hidden bg-muted/20">
+    const faqs = (dynamicFaqs && dynamicFaqs.length > 0) ? dynamicFaqs : staticFaqs;
 
-            <div className="container mx-auto px-4 md:px-0 relative z-10">
+    return (
+        <section className="py-8 md:py-12 relative overflow-hidden" style={{ backgroundColor: 'var(--muted)' }}>
+            <div className="container mx-auto px-4">
 
                 {/* Section Header */}
-                <div className="flex flex-col md:flex-row items-center md:items-end justify-between mb-16 gap-6">
-                    <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-4">
-                        <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-black dark:text-white">
-                            Got Questions? We&apos;ve Got <span className="text-primary italic">Answers</span>
-                        </h2>
-                    </div>
-
+                <div className="mb-12 text-center">
+                    <h2 className="text-3xl md:text-4xl font-black tracking-tighter" style={{ color: 'var(--foreground)' }}>
+                        Got Questions? We&apos;ve Got{' '}
+                        <span style={{ color: 'var(--primary)', fontStyle: 'italic' }}>Answers</span>
+                    </h2>
+                    <p className="mt-4 text-base" style={{ color: 'var(--muted-foreground)' }}>
+                        Everything you need to know about our services and operations.
+                    </p>
                 </div>
 
-                <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
-                    {/* Left Side: Animation */}
-                    <div
-                        className="lg:col-span-5 relative group"
-                    >
-                        <div className="relative z-10 rounded-2xl p-4 md:p-8 overflow-hidden">
+                <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+                    {/* Left: Lottie Animation */}
+                    <div className="relative flex flex-col items-center lg:sticky lg:top-8">
+                        <div className="relative w-full max-w-sm mx-auto">
                             <Lottie
                                 animationData={faqAnimation}
                                 loop={true}
-                                className="w-full h-auto drop-shadow-[0_20px_50px_rgba(var(--primary-rgb),0.2)]"
+                                className="w-full h-auto"
                             />
+
+                            {/* Floating badge - Live Chat */}
+                            <motion.div
+                                animate={{ y: [0, -12, 0], rotate: [0, 3, 0] }}
+                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute -top-4 -right-4 hidden md:flex items-center gap-3 p-4 rounded-2xl shadow-lg border"
+                                style={{
+                                    backgroundColor: 'var(--card)',
+                                    borderColor: 'var(--border)'
+                                }}
+                            >
+                                <div className="p-2 rounded-xl" style={{ backgroundColor: 'color-mix(in srgb, var(--primary) 10%, transparent)', color: 'var(--primary)' }}>
+                                    <MessageCircle className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black uppercase leading-none mb-1" style={{ color: 'var(--muted-foreground)' }}>Live Chat</p>
+                                    <p className="text-sm font-bold whitespace-nowrap" style={{ color: 'var(--foreground)' }}>Always Online</p>
+                                </div>
+                            </motion.div>
+
+                            {/* Floating badge - Instant Help */}
+                            <motion.div
+                                animate={{ y: [0, 12, 0], x: [0, -8, 0] }}
+                                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                                className="absolute -bottom-4 -left-4 hidden md:flex items-center gap-3 p-4 rounded-2xl shadow-lg border"
+                                style={{
+                                    backgroundColor: 'var(--card)',
+                                    borderColor: 'var(--border)'
+                                }}
+                            >
+                                <div className="p-2 rounded-xl" style={{ backgroundColor: 'color-mix(in srgb, #10b981 10%, transparent)', color: '#10b981' }}>
+                                    <HelpCircle className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black uppercase leading-none mb-1" style={{ color: 'var(--muted-foreground)' }}>Instant Help</p>
+                                    <p className="text-sm font-bold whitespace-nowrap" style={{ color: 'var(--foreground)' }}>Smart FAQ System</p>
+                                </div>
+                            </motion.div>
                         </div>
-
-                        {/* Decorative floating elements */}
-                        <motion.div
-                            animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
-                            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                            className="absolute -top-6 -right-6 bg-background p-5 rounded-2xl shadow-xl border border-primary/10 hidden md:flex items-center gap-3 z-20"
-                        >
-                            <div className="bg-primary/10 p-2 rounded-xl text-primary">
-                                <MessageCircle className="h-6 w-6" />
-                            </div>
-                            <div className="pr-4">
-                                <p className="text-[10px] font-black uppercase text-muted-foreground leading-none mb-1">Live Chat</p>
-                                <p className="text-sm font-bold whitespace-nowrap text-foreground">Always Online</p>
-                            </div>
-                        </motion.div>
-
-                        <motion.div
-                            animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
-                            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                            className="absolute -bottom-8 -left-8 bg-background p-5 rounded-2xl shadow-xl border border-primary/10 hidden md:flex items-center gap-3 z-20"
-                        >
-                            <div className="bg-emerald-500/10 p-2 rounded-xl text-emerald-600">
-                                <HelpCircle className="h-6 w-6" />
-                            </div>
-                            <div className="pr-4">
-                                <p className="text-[10px] font-black uppercase text-muted-foreground leading-none mb-1">Instant Help</p>
-                                <p className="text-sm font-bold whitespace-nowrap text-foreground">Smart FAQ System</p>
-                            </div>
-                        </motion.div>
                     </div>
 
-                    {/* Right Side: Animated List */}
-                    <div
-                        className="lg:col-span-7"
-                    >
-                        <AnimatedList
-                            items={faqs}
-                            className="bg-transparent"
-                            itemClassName="!bg-background !border-border text-foreground"
-                            showGradients={false}
-                        />
+                    {/* Right: Accordion FAQs */}
+                    <div className="flex flex-col gap-3">
+                        {faqs.map((faq, idx) => {
+                            const isOpen = openIndex === idx;
+                            return (
+                                <div
+                                    key={idx}
+                                    className="rounded-xl border overflow-hidden transition-all duration-300"
+                                    style={{
+                                        backgroundColor: 'var(--card)',
+                                        borderColor: isOpen ? 'var(--primary)' : 'var(--border)',
+                                        boxShadow: isOpen
+                                            ? '0 4px 20px color-mix(in srgb, var(--primary) 15%, transparent)'
+                                            : '0 1px 4px rgba(0,0,0,0.06)'
+                                    }}
+                                >
+                                    <button
+                                        onClick={() => setOpenIndex(isOpen ? null : idx)}
+                                        className="w-full flex items-center justify-between gap-4 p-5 text-left cursor-pointer"
+                                        style={{ color: 'var(--foreground)' }}
+                                    >
+                                        <span className="font-semibold text-sm md:text-base leading-snug pr-2">
+                                            {faq.question}
+                                        </span>
+                                        <motion.div
+                                            animate={{ rotate: isOpen ? 45 : 0 }}
+                                            transition={{ duration: 0.25 }}
+                                            className="shrink-0 rounded-full p-1"
+                                            style={{
+                                                backgroundColor: isOpen
+                                                    ? 'color-mix(in srgb, var(--primary) 10%, transparent)'
+                                                    : 'color-mix(in srgb, var(--foreground) 8%, transparent)',
+                                                color: isOpen ? 'var(--primary)' : 'var(--muted-foreground)'
+                                            }}
+                                        >
+                                            <Plus className="h-4 w-4" />
+                                        </motion.div>
+                                    </button>
 
-
+                                    <AnimatePresence initial={false}>
+                                        {isOpen && (
+                                            <motion.div
+                                                key="content"
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                                style={{ overflow: 'hidden' }}
+                                            >
+                                                <div
+                                                    className="px-5 pb-5 text-sm leading-relaxed border-t pt-4"
+                                                    style={{
+                                                        color: 'var(--muted-foreground)',
+                                                        borderColor: 'var(--border)'
+                                                    }}
+                                                >
+                                                    {faq.answer}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
         </section>
     );
 }
-

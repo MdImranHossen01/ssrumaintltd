@@ -19,7 +19,7 @@ interface LogoProps {
 export function Logo({ className, imageClassName, textClassName, showText = true, onClick, sizes, src }: LogoProps) {
   const { brandName, logoUrl } = useSettings();
 
-  const finalBrandName = brandName || "SS Ruma International Ltd";
+  const finalBrandName = brandName || "Palli Vita Nutrition Hub";
   const finalLogoUrl = src || logoUrl || "/logo.webp";
 
   return (
@@ -36,16 +36,16 @@ export function Logo({ className, imageClassName, textClassName, showText = true
         />
       </div>
       {showText && (
-        <span className={cn(
-          "text-xl md:text-2xl uppercase text-foreground transition-colors group-hover:text-primary font-black tracking-tighter font-logo",
-          textClassName
-        )}>
-          {finalBrandName}
-        </span>
+        <div className="flex flex-col text-left leading-[1.1] shrink-0">
+          <span className="text-[16px] md:text-[20px] lg:text-[22px] uppercase text-foreground transition-colors group-hover:text-primary tracking-wider font-logo font-medium">
+            S S Ruma
+          </span>
+          <span className="text-[14px] md:text-[16px] lg:text-[18px] uppercase text-foreground/80 transition-colors group-hover:text-primary tracking-widest font-logo font-normal">
+            International Ltd
+          </span>
+        </div>
       )}
     </Link>
   );
 }
-
-
 

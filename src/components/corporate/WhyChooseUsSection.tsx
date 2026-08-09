@@ -1,8 +1,10 @@
 import { Users, Shield, Award, Clock, DollarSign, Globe2, CheckCircle } from 'lucide-react';
+import SectionFade from './SectionFade';
 
 export default function WhyChooseUsSection() {
   return (
-    <section id="why-choose-us" className="py-20 md:py-28 bg-card/10 border-b border-border">
+    <section id="why-choose-us" className="py-8 md:py-12 bg-card/10 border-b border-border">
+      <SectionFade>
       <div className="container mx-auto px-4 max-w-6xl space-y-16">
         <div className="text-center max-w-2xl mx-auto space-y-4">
           <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
@@ -36,6 +38,7 @@ export default function WhyChooseUsSection() {
           })}
         </div>
       </div>
+      </SectionFade>
     </section>
   );
 }
