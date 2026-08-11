@@ -25,8 +25,8 @@ export function Providers({
       <ReduxProvider store={store}>
         <NextThemesProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <SettingsProvider settings={settings}>

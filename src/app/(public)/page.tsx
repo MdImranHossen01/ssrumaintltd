@@ -14,7 +14,6 @@ import CertificationsSection from '@/components/corporate/CertificationsSection'
 import ProjectsSection from '@/components/corporate/ProjectsSection';
 import TransformationSection from '@/components/corporate/TransformationSection';
 import TestimonialsSection from '@/components/corporate/TestimonialsSection';
-import PartnersSection from '@/components/corporate/PartnersSection';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getCachedSettings();
@@ -57,8 +56,7 @@ export default async function HomePage() {
       {/* 2. About Us */}
       <AboutSection brandName={brandName} />
 
-      {/* 3. Our Services */}
-      <ServicesSection />
+
 
       {/* 4. Why Choose Us */}
       <WhyChooseUsSection />
@@ -81,8 +79,6 @@ export default async function HomePage() {
       {/* 10. FAQ Accordion Section */}
       <FAQSection faqs={faqs} />
 
-      {/* 11. Clients & Partners */}
-      <PartnersSection />
     </div>
   );
 }

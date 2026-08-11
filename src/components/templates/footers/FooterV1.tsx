@@ -121,7 +121,11 @@ export default function FooterV1() {
       <div className="container mx-auto px-4 md:px-0">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
           <div className="flex flex-col items-center text-center md:items-start md:text-left gap-4 lg:col-span-2">
-            <Logo textClassName="text-[13px] sm:text-base md:text-2xl whitespace-nowrap truncate tracking-tighter" />
+            <Logo
+              imageClassName="size-10 md:size-14"
+              textClassName="text-[12px] sm:text-base md:text-2xl lg:text-3xl whitespace-nowrap truncate tracking-tighter"
+              sizes="(max-width: 768px) 32px, 56px"
+            />
             <p className="text-sm text-muted-foreground w-full md:w-4/5">
               Empowering global trade and construction with excellence, reliability, and international standards.
             </p>
