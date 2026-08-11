@@ -52,14 +52,16 @@ const employees: Employee[] = [
     name: 'Md. Mohibullah',
     designation: 'Accountant',
     education: 'BSS',
-    department: 'Accounts & Finance'
+    department: 'Accounts & Finance',
+    imagePath: '/assets/images/empoloye/mohibullah.webp'
   },
   {
     slNo: 6,
     name: 'Sk Shimul',
     designation: 'Purchase Officer',
     education: 'BA',
-    department: 'Supply Chain & Procurement'
+    department: 'Supply Chain & Procurement',
+    imagePath: '/assets/images/empoloye/shimul.webp'
   },
   {
     slNo: 7,
@@ -73,7 +75,8 @@ const employees: Employee[] = [
     name: 'Moniruzzaman Munna',
     designation: 'Office Assistant',
     education: 'JSC',
-    department: 'General Operations'
+    department: 'General Operations',
+    imagePath: '/assets/images/empoloye/Moniruzzaman.webp'
   },
   {
     slNo: 9,
