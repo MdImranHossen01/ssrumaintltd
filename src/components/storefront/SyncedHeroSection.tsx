@@ -24,9 +24,9 @@ const slides: SlideData[] = [
     highlightedTitle: 'Engineering & Construction',
     description: 'Expert structural planning, foundation piling works, commercial building renovations, and complete civil engineering solutions matching international compliance.',
     primaryBtnText: 'Explore Projects',
-    primaryBtnLink: '#projects',
+    primaryBtnLink: '/#projects',
     secondaryBtnText: 'Our Services',
-    secondaryBtnLink: '#services',
+    secondaryBtnLink: '/services',
     image: '/assets/images/Banner/construction-hero.webp'
   },
   {
@@ -34,7 +34,7 @@ const slides: SlideData[] = [
     highlightedTitle: 'Import & Export Solutions',
     description: 'Premier international trade consultancy specializing in custom clearance, freight logistics coordination, global product sourcing, and supply chains.',
     primaryBtnText: 'Trade Consultations',
-    primaryBtnLink: '#contact',
+    primaryBtnLink: '/contact',
     secondaryBtnText: 'Certifications',
     secondaryBtnLink: '#certifications',
     image: '/assets/images/Banner/trade-hero.webp'
@@ -44,9 +44,9 @@ const slides: SlideData[] = [
     highlightedTitle: 'Strategic Advisory',
     description: 'End-to-end legal compliance consultation, company incorporation, tax file documentation clearing, and general supply capabilities.',
     primaryBtnText: 'Request Consultation',
-    primaryBtnLink: '#contact',
+    primaryBtnLink: '/contact',
     secondaryBtnText: 'Learn More',
-    secondaryBtnLink: '#about',
+    secondaryBtnLink: '/about',
     image: '/assets/images/Banner/consulting-hero.webp'
   }
 ];
@@ -70,11 +70,11 @@ export function SyncedHeroSection() {
       <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-8 items-center relative z-10">
-        
+
         {/* Banner Image Column (Order-1 on Mobile, Edge-to-Edge Non-Rounded like Shahjalal Enterprise) */}
         <div className="order-1 lg:order-2 relative w-full max-w-none md:max-w-lg lg:max-w-none mx-auto group">
           <div className="hidden md:block absolute -inset-1 bg-gradient-to-r from-primary to-primary/30 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition duration-1000" />
-          
+
           <div className="relative bg-transparent md:bg-card border-0 md:border p-0 md:p-3 rounded-none md:rounded-2xl shadow-none md:shadow-2xl overflow-hidden">
             <div className="aspect-video relative rounded-none md:rounded-xl overflow-hidden bg-muted">
               <AnimatePresence mode="popLayout">

@@ -205,44 +205,43 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-sm border-b shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="flex h-16 md:h-20 items-center justify-between">
+          <div className="relative flex h-16 md:h-20 items-center justify-between">
 
-            {/* Left: Logo & Mobile Menu */}
-            <div className="flex items-center gap-2">
-              {/* Mobile Menu Trigger */}
-              <div className="flex md:hidden items-center">
-                <Sheet open={open} onOpenChange={setOpen}>
-                  <SheetTrigger className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <Menu className="h-5 w-5" />
-                    <span className="sr-only">Toggle mobile menu</span>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="w-[300px]">
-                    <nav className="flex flex-col gap-6 mt-12 px-2">
-                      <Logo onClick={() => setOpen(false)} />
-                      <div className="space-y-4 pt-6 border-t font-medium tracking-tight">
-                        {navItems.map((item) => {
-                          const isActive = pathname === item.href || (item.href === '/#home' && pathname === '/');
-                          return (
-                            <Link
-                              key={item.href}
-                              href={item.href}
-                              className={`block px-4 py-2 rounded-xl transition-all ${isActive
-                                ? 'bg-primary text-white font-bold shadow-lg shadow-primary/20'
-                                : 'hover:text-primary font-medium'
-                                }`}
-                              onClick={() => setOpen(false)}
-                            >
-                              {item.label}
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    </nav>
-                  </SheetContent>
-                </Sheet>
-              </div>
+            {/* Left: Mobile Menu Trigger (Absolute on mobile, hidden on desktop) */}
+            <div className="absolute left-0 flex md:hidden items-center">
+              <Sheet open={open} onOpenChange={setOpen}>
+                <SheetTrigger className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle mobile menu</span>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[300px]">
+                  <nav className="flex flex-col gap-6 mt-12 px-2">
+                    <Logo onClick={() => setOpen(false)} />
+                    <div className="space-y-4 pt-6 border-t font-medium tracking-tight">
+                      {navItems.map((item) => {
+                        const isActive = pathname === item.href || (item.href === '/#home' && pathname === '/');
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className={`block px-4 py-2 rounded-xl transition-all ${isActive
+                              ? 'bg-primary text-white font-bold shadow-lg shadow-primary/20'
+                              : 'hover:text-primary font-medium'
+                              }`}
+                            onClick={() => setOpen(false)}
+                          >
+                            {item.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </nav>
+                </SheetContent>
+              </Sheet>
+            </div>
 
-              {/* Logo */}
+            {/* Center/Left: Logo (Centered on mobile, left-aligned on desktop) */}
+            <div className="flex w-full md:w-auto justify-center md:justify-start items-center">
               <Logo
                 imageClassName="size-10 md:size-14"
                 textClassName="text-[12px] sm:text-base md:text-2xl lg:text-3xl whitespace-nowrap truncate tracking-tighter"
