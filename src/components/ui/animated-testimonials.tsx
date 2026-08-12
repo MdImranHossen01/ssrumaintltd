@@ -2,6 +2,7 @@
 
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "motion/react";
+import Image from "next/image";
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -84,11 +85,12 @@ export const AnimatedTestimonials = ({
                   }}
                   className="absolute inset-0 origin-bottom"
                 >
-                  <img
+                  <Image
                     src={testimonial.src}
                     alt={testimonial.name}
                     draggable={false}
-                    className="h-full w-full rounded-3xl object-cover object-center"
+                    fill
+                    className="rounded-3xl object-cover object-center"
                   />
                 </motion.div>
               ))}
