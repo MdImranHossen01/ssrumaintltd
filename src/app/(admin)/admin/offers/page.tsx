@@ -17,6 +17,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Skeleton } from '@/components/ui/skeleton';
+import { AdminTableSkeleton } from '@/components/admin/AdminSkeletons';
 import {
   Loader2,
   Plus,
@@ -61,6 +63,17 @@ function ClientOffersContent() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
+  const [dateFilter, setDateFilter] = useState(() => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return {
+      from: format(start, 'yyyy-MM-dd'),
+      to: format(end, 'yyyy-MM-dd')
+    };
+  });
+  const [filterByDate, setFilterByDate] = useState(true);
+
   const initialPage = Math.max(1, parseInt(searchParams.get('page') || '1'));
   const [currentPage, setCurrentPage] = useState(initialPage);
   
@@ -77,13 +90,13 @@ function ClientOffersContent() {
     router.push(`/admin/offers?${params.toString()}`);
   }, [currentPage]);
 
-  // Reset page when search term changes
+  // Reset page when search term or dates change
   useEffect(() => {
     setCurrentPage(1);
     const params = new URLSearchParams(searchParams.toString());
     params.delete('page');
     router.push(`/admin/offers?${params.toString()}`);
-  }, [searchTerm]);
+  }, [searchTerm, filterByDate, dateFilter.from, dateFilter.to]);
 
   // Offer detail view state
   const [selectedOffer, setSelectedOffer] = useState<any>(null);
@@ -411,11 +424,23 @@ function ClientOffersContent() {
     }
   };
 
-  const filteredOffers = offers.filter(b =>
-    b.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    b.clientPhone.includes(searchTerm) ||
-    b.invoiceNo.includes(searchTerm)
-  );
+  const filteredOffers = offers.filter(b => {
+    const matchesSearch = b.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      b.clientPhone.includes(searchTerm) ||
+      b.invoiceNo.includes(searchTerm);
+
+    let matchesDate = true;
+    if (filterByDate) {
+      if (dateFilter.from) {
+        matchesDate = matchesDate && new Date(b.date) >= new Date(dateFilter.from + 'T00:00:00');
+      }
+      if (dateFilter.to) {
+        matchesDate = matchesDate && new Date(b.date) <= new Date(dateFilter.to + 'T23:59:59');
+      }
+    }
+
+    return matchesSearch && matchesDate;
+  });
 
   const ITEMS_PER_PAGE = 20;
   const totalPages = Math.ceil(filteredOffers.length / ITEMS_PER_PAGE);
@@ -423,6 +448,8 @@ function ClientOffersContent() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  const isFiltered = !!((filterByDate && (dateFilter.from || dateFilter.to)) || searchTerm);
 
   return (
     <div className="flex-1 space-y-6 px-0 py-4 md:p-8">
@@ -437,25 +464,95 @@ function ClientOffersContent() {
       </div>
 
       {/* Offers Table */}
-      <Card>
+      <Card className="border-0 bg-transparent md:border md:bg-card shadow-none md:shadow-sm">
         <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <CardTitle>Quotations List</CardTitle>
-            <div className="relative w-full md:w-72">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by client or invoice..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+              <div className="relative w-full md:w-56">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by client or invoice..."
+                  className="pl-8 text-xs h-8"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              {/* Date Filter Checkbox & Date Inputs */}
+              <div className="flex items-center gap-1.5 text-xs">
+                <label className="flex items-center gap-1 cursor-pointer font-bold text-foreground shrink-0 select-none">
+                  <input
+                    type="checkbox"
+                    checked={filterByDate}
+                    onChange={(e) => setFilterByDate(e.target.checked)}
+                    className="rounded border-border text-primary focus:ring-primary h-3.5 w-3.5 accent-primary"
+                  />
+                  Filter by Date
+                </label>
+
+                <div className={`flex items-center gap-1 bg-muted/50 p-0.5 rounded-md border w-full sm:w-auto transition-opacity duration-200 ${!filterByDate ? 'opacity-40 pointer-events-none' : ''}`}>
+                  <Input
+                    type="date"
+                    className="h-7 border-none bg-transparent focus-visible:ring-0 p-0.5 text-xs md:w-28 font-medium"
+                    value={dateFilter.from}
+                    onChange={(e) => setDateFilter(prev => ({ ...prev, from: e.target.value }))}
+                    disabled={!filterByDate}
+                  />
+                  <span className="text-muted-foreground text-[10px] shrink-0 font-medium">to</span>
+                  <Input
+                    type="date"
+                    className="h-7 border-none bg-transparent focus-visible:ring-0 p-0.5 text-xs md:w-28 font-medium"
+                    value={dateFilter.to}
+                    onChange={(e) => setDateFilter(prev => ({ ...prev, to: e.target.value }))}
+                    disabled={!filterByDate}
+                  />
+                </div>
+              </div>
+
+              {isFiltered && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    const now = new Date();
+                    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+                    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    setDateFilter({
+                      from: format(start, 'yyyy-MM-dd'),
+                      to: format(end, 'yyyy-MM-dd')
+                    });
+                    setFilterByDate(false);
+                    setSearchTerm('');
+                  }}
+                  className="text-xs text-muted-foreground hover:text-primary shrink-0 h-8"
+                >
+                  Clear
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex h-32 items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="space-y-3 py-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between p-3 border rounded-xl animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-4 w-4 rounded" />
+                    <div className="space-y-1.5">
+                      <Skeleton className="h-4 w-32 rounded" />
+                      <Skeleton className="h-3 w-20 rounded" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-4 w-20 rounded hidden sm:block" />
+                  <Skeleton className="h-4 w-24 rounded hidden md:block" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-8 w-8 rounded-lg" />
+                    <Skeleton className="h-8 w-8 rounded-lg" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : filteredOffers.length === 0 ? (
             <div className="flex h-32 flex-col items-center justify-center text-muted-foreground">
@@ -464,85 +561,167 @@ function ClientOffersContent() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Quotation No</TableHead>
-                    <TableHead>Client Name</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Total Offer (৳)</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedOffers.map((offer) => (
-                    <TableRow key={offer._id}>
-                      <TableCell className="font-semibold">{offer.invoiceNo}</TableCell>
-                      <TableCell>{offer.clientName}</TableCell>
-                      <TableCell>{offer.clientPhone}</TableCell>
-                      <TableCell>{format(new Date(offer.date), 'dd MMM yyyy')}</TableCell>
-                      <TableCell className="text-right font-medium">৳{Math.round(offer.total)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-teal-600 hover:text-teal-700 hover:bg-teal-50"
-                            onClick={() => generateBillPDF(offer, settings, 'print')}
-                            title="Print Quotation"
-                          >
-                            <Printer className="h-4 w-4" />
-                          </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setSelectedOffer(offer)}>
-                              <Eye className="mr-2 h-4 w-4" /> View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setEditingOffer(offer);
-                                setClientName(offer.clientName);
-                                setClientPhone(offer.clientPhone);
-                                setClientAddress(offer.clientAddress);
-                                setBillItems(offer.items);
-                                setDeliveryCharge(offer.deliveryCharge);
-                                setServiceFee(offer.serviceFee || 0);
-                                setDiscountType(offer.discountType || 'fixed');
-                                setDiscountValue(offer.discountValue || 0);
-                                setIsCreateOpen(true);
-                              }}
-                            >
-                              <Edit className="mr-2 h-4 w-4" /> Edit Offer
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => generateBillPDF(offer, settings, 'download')}>
-                              <Download className="mr-2 h-4 w-4" /> Download PDF
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => generateBillPDF(offer, settings, 'print')}>
-                              <Printer className="mr-2 h-4 w-4" /> Print PDF
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleConvertToChalan(offer)}>
-                              <ArrowRight className="mr-2 h-4 w-4" /> Convert to Challan
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive focus:text-destructive"
-                              onClick={() => handleDeleteOffer(offer._id)}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" /> Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
+              {/* Desktop View */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Quotation No</TableHead>
+                      <TableHead>Client Name</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Total Offer (৳)</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedOffers.map((offer) => (
+                      <TableRow key={offer._id}>
+                        <TableCell className="font-semibold">{offer.invoiceNo}</TableCell>
+                        <TableCell>{offer.clientName}</TableCell>
+                        <TableCell>{offer.clientPhone}</TableCell>
+                        <TableCell>{format(new Date(offer.date), 'dd MMM yyyy')}</TableCell>
+                        <TableCell className="text-right font-medium">৳{Math.round(offer.total)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+                              onClick={() => generateBillPDF(offer, settings, 'print')}
+                              title="Print Quotation"
+                            >
+                              <Printer className="h-4 w-4" />
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => setSelectedOffer(offer)}>
+                                <Eye className="mr-2 h-4 w-4" /> View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setEditingOffer(offer);
+                                  setClientName(offer.clientName);
+                                  setClientPhone(offer.clientPhone);
+                                  setClientAddress(offer.clientAddress);
+                                  setBillItems(offer.items);
+                                  setDeliveryCharge(offer.deliveryCharge);
+                                  setServiceFee(offer.serviceFee || 0);
+                                  setDiscountType(offer.discountType || 'fixed');
+                                  setDiscountValue(offer.discountValue || 0);
+                                  setIsCreateOpen(true);
+                                }}
+                              >
+                                <Edit className="mr-2 h-4 w-4" /> Edit Offer
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => generateBillPDF(offer, settings, 'download')}>
+                                <Download className="mr-2 h-4 w-4" /> Download PDF
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => generateBillPDF(offer, settings, 'print')}>
+                                <Printer className="mr-2 h-4 w-4" /> Print PDF
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleConvertToChalan(offer)}>
+                                <ArrowRight className="mr-2 h-4 w-4" /> Convert to Challan
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => handleDeleteOffer(offer._id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile View */}
+              <div className="block md:hidden space-y-3 p-2">
+                {paginatedOffers.map((offer) => (
+                  <div key={offer._id} className="p-3 border rounded-lg bg-background shadow-sm space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-sm text-primary">{offer.invoiceNo}</span>
+                      <span className="text-[10px] text-muted-foreground">{format(new Date(offer.date), 'dd MMM yyyy')}</span>
+                    </div>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Client:</span>
+                        <span className="font-medium text-foreground">{offer.clientName}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Phone:</span>
+                        <span className="text-foreground">{offer.clientPhone}</span>
+                      </div>
+                      <div className="flex justify-between pt-1 border-t">
+                        <span className="text-muted-foreground font-bold">Total:</span>
+                        <span className="font-bold text-foreground">৳{Math.round(offer.total)}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-teal-600 hover:text-teal-700 text-xs px-2.5"
+                        onClick={() => generateBillPDF(offer, settings, 'print')}
+                      >
+                        <Printer className="h-3.5 w-3.5 mr-1" /> Print
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setSelectedOffer(offer)}>
+                            <Eye className="mr-2 h-4 w-4" /> View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setEditingOffer(offer);
+                              setClientName(offer.clientName);
+                              setClientPhone(offer.clientPhone);
+                              setClientAddress(offer.clientAddress);
+                              setBillItems(offer.items);
+                              setDeliveryCharge(offer.deliveryCharge);
+                              setServiceFee(offer.serviceFee || 0);
+                              setDiscountType(offer.discountType || 'fixed');
+                              setDiscountValue(offer.discountValue || 0);
+                              setIsCreateOpen(true);
+                            }}
+                          >
+                            <Edit className="mr-2 h-4 w-4" /> Edit Offer
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => generateBillPDF(offer, settings, 'download')}>
+                            <Download className="mr-2 h-4 w-4" /> Download PDF
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => generateBillPDF(offer, settings, 'print')}>
+                            <Printer className="mr-2 h-4 w-4" /> Print PDF
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleConvertToChalan(offer)}>
+                            <ArrowRight className="mr-2 h-4 w-4" /> Convert to Challan
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => handleDeleteOffer(offer._id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
           {totalPages > 1 && (
@@ -623,7 +802,7 @@ function ClientOffersContent() {
             {/* Manual item entries */}
             <div className="space-y-3">
               {billItems.map((item, index) => (
-                <div key={index} className="flex items-center gap-3">
+                <div key={index} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 border p-2 sm:p-0 sm:border-none rounded-md">
                   <div className="flex-1">
                     <Input
                       placeholder="Item name / Description"
@@ -632,35 +811,37 @@ function ClientOffersContent() {
                       required
                     />
                   </div>
-                  <div className="w-24">
-                    <Input
-                      type="number"
-                      placeholder="Qty"
-                      min="1"
-                      value={item.quantity}
-                      onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                      required
-                    />
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <div className="flex-1 sm:w-24">
+                      <Input
+                        type="number"
+                        placeholder="Qty"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="flex-1 sm:w-28">
+                      <Input
+                        type="number"
+                        placeholder="Price"
+                        min="0"
+                        value={item.price}
+                        onChange={(e) => handleItemChange(index, 'price', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveItemRow(index)}
+                      className="text-destructive hover:bg-destructive/10 shrink-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <div className="w-28">
-                    <Input
-                      type="number"
-                      placeholder="Price"
-                      min="0"
-                      value={item.price}
-                      onChange={(e) => handleItemChange(index, 'price', e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveItemRow(index)}
-                    className="text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
                 </div>
               ))}
             </div>
@@ -954,7 +1135,7 @@ function ClientOffersContent() {
 
 export default function ClientOffersPage() {
   return (
-    <Suspense fallback={<div className="flex h-32 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+    <Suspense fallback={<AdminTableSkeleton rowCount={7} columnCount={6} titleWidth="w-56" showStats={true} />}>
       <ClientOffersContent />
     </Suspense>
   );

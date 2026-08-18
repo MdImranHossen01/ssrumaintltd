@@ -50,6 +50,10 @@ export interface IOrder extends Document {
     transactionId?: string;
   };
   internalNote?: string;
+  showroom?: mongoose.Types.ObjectId;
+  isCreditOrder?: boolean;
+  expectedPaymentDate?: Date;
+  paidAmount?: number;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date | null;
@@ -113,6 +117,10 @@ const OrderSchema: Schema<IOrder> = new Schema(
       transactionId: { type: String },
     },
     internalNote: { type: String, default: '' },
+    showroom: { type: Schema.Types.ObjectId, ref: 'Showroom' },
+    isCreditOrder: { type: Boolean, default: false },
+    expectedPaymentDate: { type: Date },
+    paidAmount: { type: Number, default: 0 },
     deletedAt: { type: Date, default: null },
   },
   { timestamps: true }

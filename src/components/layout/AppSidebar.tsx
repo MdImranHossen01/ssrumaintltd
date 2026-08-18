@@ -15,7 +15,8 @@ import {
   Megaphone,
   Store,
   Mail,
-  CreditCard
+  CreditCard,
+  Monitor
 } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
@@ -84,6 +85,10 @@ const data = {
           url: "/admin/orders",
         },
         {
+          title: "Abandoned Carts",
+          url: "/admin/abandoned-carts",
+        },
+        {
           title: "Offers / Quotations",
           url: "/admin/offers",
         },
@@ -113,6 +118,7 @@ const data = {
         },
       ],
     },
+
     {
       title: "User Management",
       url: "#",
@@ -134,6 +140,10 @@ const data = {
           url: "/admin/cms/banners",
         },
         {
+          title: "Landing Pages",
+          url: "/admin/landing-pages",
+        },
+        {
           title: "Testimonials",
           url: "/admin/cms/testimonials",
         },
@@ -143,7 +153,21 @@ const data = {
         },
       ],
     },
-
+    {
+      title: "Blogs",
+      url: "#",
+      icon: FileText,
+      items: [
+        {
+          title: "Manage Blog",
+          url: "/admin/blogs",
+        },
+        {
+          title: "Add New Blog",
+          url: "/admin/blogs/new",
+        },
+      ],
+    },
     {
       title: "System Settings",
       url: "#",

@@ -1,4 +1,4 @@
-﻿import { format, isValid } from 'date-fns';
+import { format, isValid } from 'date-fns';
 
 function generateBarcodeHtml(value: string): string {
   const CODE39_MAP: Record<string, string> = {
@@ -51,7 +51,7 @@ export async function printStickerInvoice(orderOrOrders: any | any[], settings: 
   const orders = Array.isArray(orderOrOrders) ? orderOrOrders : [orderOrOrders];
   if (orders.length === 0) return;
 
-  const storeName: string = settings?.siteName || settings?.brandName || 'SS Ruma International Ltd';
+  const storeName: string = settings?.siteName || settings?.brandName || 'Rumas World';
 
   // Dynamic theme variables
   let primary = '#00D1B2';
@@ -89,7 +89,7 @@ export async function printStickerInvoice(orderOrOrders: any | any[], settings: 
 
     const codAmount = order.paymentStatus === 'Paid' ? 0 : Math.round(order.totalAmount);
     const trackingUrl = order.shippingDetails?.trackingUrl || `https://steadfast.com.bd/t/${consignmentId}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(trackingUrl)}`;
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(consignmentId || trackingUrl)}`;
 
     return `
       <div class="sticker-container" style="${index < orders.length - 1 ? 'page-break-after: always; break-after: page;' : ''}">
@@ -112,35 +112,23 @@ export async function printStickerInvoice(orderOrOrders: any | any[], settings: 
             <div class="qr-box">
               ${consignmentId ? `<img src="${qrCodeUrl}" alt="QR Link" />` : `<div style="font-size: 8px; text-align: center; color: #888;">No QR Code</div>`}
             </div>
-            <div class="info-table">
-              <div class="table-header">${courierName} Courier</div>
-              <div class="table-row">
-                <div class="table-cell table-cell-bold">P: ${order.shippingAddress?.city || 'N/A'}</div>
+            <div class="info-table" style="padding: 8px; display: flex; flex-direction: column; justify-content: center; gap: 4px;">
+              <div style="font-weight: 700; font-size: 13px; color: #000000; text-transform: uppercase;">${order.shippingAddress?.fullName || 'Customer'}</div>
+              <div style="font-weight: 700; font-size: 13px; color: #000000;">${order.shippingAddress?.phone || ''}</div>
+              <div style="font-size: 10px; color: #333333; line-height: 1.3;">
+                ${order.shippingAddress?.street || ''}
               </div>
-              <div class="table-row">
-                <div class="table-cell">D: ${order.shippingAddress?.state || order.shippingAddress?.city || 'N/A'}</div>
-              </div>
-              <div class="table-row">
-                <div class="table-cell table-cell-bold" style="background-color: #f3f4f6;">
-                  ${order.shippingAddress?.city || 'N/A'}
+              ${codAmount > 0 ? `
+                <div style="font-weight: 700; font-size: 13px; margin-top: 4px; border-top: 1px dashed #000000; padding-top: 4px; display: flex; justify-content: space-between; align-items: center;">
+                  <span>COD Amount:</span>
+                  <span>৳${codAmount}</span>
                 </div>
-              </div>
-              <div class="table-row">
-                <div class="table-cell table-cell-split">
-                  <span style="font-weight: 700;">COD</span>
-                  <span style="font-weight: 700;">৳${codAmount}</span>
+              ` : `
+                <div style="font-weight: 700; font-size: 11px; margin-top: 4px; border-top: 1px dashed #000000; padding-top: 4px; color: green;">
+                  Paid / No COD
                 </div>
-              </div>
-              <div class="table-row">
-                <div class="table-cell" style="font-size: 8px; color: #555;">WGT# 0.5 KG</div>
-              </div>
+              `}
             </div>
-          </div>
-
-          <div class="recipient-details">
-            <div class="recipient-name">${order.shippingAddress?.fullName || 'Customer'}</div>
-            <div class="recipient-phone">${order.shippingAddress?.phone || ''}</div>
-            <div>${order.shippingAddress?.street || ''}, ${order.shippingAddress?.city || ''}</div>
           </div>
         </div>
 
@@ -349,22 +337,27 @@ export async function printStickerInvoice(orderOrOrders: any | any[], settings: 
 
   const printWindow = window.open('', '_blank');
   if (printWindow) {
+    printWindow.document.open();
     printWindow.document.write(htmlContent);
     printWindow.document.close();
-    
-    printWindow.onload = () => {
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
-    };
-    
-    setTimeout(() => {
-      if (printWindow.document.readyState === 'complete') {
+
+    const triggerPrint = () => {
+      try {
         printWindow.focus();
         printWindow.print();
-        printWindow.close();
+      } catch (err) {
+        console.error('Print failed:', err);
       }
-    }, 1000);
+    };
+
+    if (printWindow.document.readyState === 'complete') {
+      setTimeout(triggerPrint, 300);
+    } else {
+      printWindow.onload = () => {
+        setTimeout(triggerPrint, 300);
+      };
+    }
   }
 }
+
 

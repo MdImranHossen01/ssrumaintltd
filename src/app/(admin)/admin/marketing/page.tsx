@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Truck, CreditCard, Globe, X, BarChart3, Settings2 } from 'lucide-react';
+import { AdminSettingsSkeleton } from '@/components/admin/AdminSkeletons';
 import { toast } from 'sonner';
 import { ImageUpload } from '@/components/ui/image-upload';
 import {
@@ -264,11 +265,7 @@ export default function MarketingSettingsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <AdminSettingsSkeleton title="Marketing & Integrations" />;
   }
 
   return (

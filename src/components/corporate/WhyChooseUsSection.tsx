@@ -1,4 +1,4 @@
-import { Users, Shield, Award, Clock, DollarSign, Globe2, CheckCircle } from 'lucide-react';
+import { Users, Shield, Award, Clock, DollarSign, Globe2, CheckCircle, ThumbsUp } from 'lucide-react';
 import SectionFade from './SectionFade';
 
 export default function WhyChooseUsSection() {
@@ -13,7 +13,7 @@ export default function WhyChooseUsSection() {
           <div className="h-1 w-12 bg-primary mx-auto rounded-full" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {[
             { icon: Users, title: 'Professional Team', desc: 'Expert personnel ensuring execution success.' },
             { icon: Shield, title: 'Government Registered Company', desc: 'Fully government registered and compliant.' },
@@ -21,11 +21,12 @@ export default function WhyChooseUsSection() {
             { icon: Clock, title: 'Fast Service', desc: 'Strict commitment to timeframes.' },
             { icon: DollarSign, title: 'Competitive Pricing', desc: 'Cost-efficient and budget-friendly operations.' },
             { icon: Globe2, title: 'International Standard', desc: 'Working strictly according to global benchmarks.' },
-            { icon: CheckCircle, title: 'Trusted Partner', desc: 'Fostering long-term customer relationships.' }
+            { icon: CheckCircle, title: 'Trusted Partner', desc: 'Fostering long-term customer relationships.' },
+            { icon: ThumbsUp, title: 'Customer Satisfaction', desc: 'Dedicated support to ensure a seamless experience.' }
           ].map((item, index) => {
             const Icon = item.icon;
             return (
-              <div key={index} className="bg-background border border-border/80 p-6 rounded-2xl flex flex-col gap-4">
+              <div key={index} className="bg-background border border-border/80 p-4 md:p-6 rounded-2xl flex flex-col gap-4">
                 <div className="p-3 bg-primary/10 text-primary rounded-xl w-fit">
                   <Icon className="h-5 w-5" />
                 </div>

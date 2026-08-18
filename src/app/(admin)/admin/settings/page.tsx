@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Truck, CreditCard, Globe, X, BarChart3 } from 'lucide-react';
+import { AdminSettingsSkeleton } from '@/components/admin/AdminSkeletons';
 import { toast } from 'sonner';
 import { ImageUpload } from '@/components/ui/image-upload';
 import {
@@ -351,11 +352,7 @@ export default function SettingsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <AdminSettingsSkeleton title="Global Settings" />;
   }
 
   return (
@@ -393,7 +390,7 @@ export default function SettingsPage() {
                       <FormItem>
                         <FormLabel className="text-sm font-semibold text-gray-700">Brand Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="SS Ruma International Ltd" {...field} className="h-12 rounded-xl bg-gray-50 border-2 border-gray-100 focus:border-primary transition-all" />
+                          <Input placeholder="Palli Vita Nutrition Hub" {...field} className="h-12 rounded-xl bg-gray-50 border-2 border-gray-100 focus:border-primary transition-all" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -445,7 +442,7 @@ export default function SettingsPage() {
                         <FormItem>
                           <FormLabel>Global Meta Title</FormLabel>
                           <FormControl>
-                            <Input placeholder="SS Ruma International Ltd | Best Ecommerce in BD" {...field} />
+                            <Input placeholder="Palli Vita Nutrition Hub | Best Ecommerce in BD" {...field} />
                           </FormControl>
                           <FormDescription>Used as the primary browser title for the home page.</FormDescription>
                           <FormMessage />
@@ -459,7 +456,7 @@ export default function SettingsPage() {
                         <FormItem>
                           <FormLabel>Global Meta Description</FormLabel>
                           <FormControl>
-                            <Input placeholder="Shop the best products at SS Ruma International Ltd..." {...field} />
+                            <Input placeholder="Shop the best products at Palli Vita Nutrition Hub..." {...field} />
                           </FormControl>
                           <FormDescription>Used for search engine snippets and social sharing.</FormDescription>
                           <FormMessage />

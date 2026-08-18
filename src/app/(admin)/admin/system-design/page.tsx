@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { AdminSystemDesignSkeleton } from '@/components/admin/AdminSkeletons';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -33,7 +34,7 @@ import {
 } from "@/components/ui/select";
 import { ImageUpload } from '@/components/ui/image-upload';
 
-const TEMPLATE_OPTIONS = ['v1', 'v2', 'v3', 'v4', 'v5', 'aarong'];
+const TEMPLATE_OPTIONS = ['v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'aarong'];
 const THEME_OPTIONS = ['default', 'emerald', 'black', 'caffeine', 'claude', 'elegant', 'marvel', 'material', 'midnight', 'nature', 'perplexity', 'slack', 'summer', 'sunset', 'valorant', 'supabase', 'amber', 'catppuccin', 'clay', 'cyberpunk', 'darkmatter', 'ocean', 'quantum', 't3', 'tangerine', 'vintage', 'green', 'red', 'rose', 'orange', 'blue', 'yellow', 'violet'];
 
 const TEMPLATE_CONFIG = [
@@ -141,11 +142,7 @@ export default function SuperConfigPage() {
     });
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
-    </div>
-  );
+  if (loading) return <AdminSystemDesignSkeleton />;
 
   const ui = settings?.uiTemplates || {};
 

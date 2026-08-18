@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Pagination } from '@/components/ui/pagination';
@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { AdminTableSkeleton } from '@/components/admin/AdminSkeletons';
 import { 
   MoreHorizontal, 
   Loader2, 
@@ -69,7 +71,14 @@ interface UserData {
 function UsersContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [currentPage, setCurrentPage] = useState(Math.max(1, parseInt(searchParams.get('page') || '1')));
+  const pageParam = searchParams.get('page');
+  let currentPage = 1;
+  if (pageParam) {
+    const parsedPage = parseInt(pageParam, 10);
+    if (!isNaN(parsedPage)) {
+      currentPage = Math.max(1, parsedPage);
+    }
+  }
 
   const [users, setUsers] = useState<UserData[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -87,15 +96,6 @@ function UsersContent() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  // Reset page when filters change
-  useEffect(() => {
-    if (currentPage > 1) {
-      setCurrentPage(1);
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete('page');
-      router.push(`/admin/users?${params.toString()}`);
-    }
-  }, [debouncedSearchTerm]);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isAssignAdminOpen, setIsAssignAdminOpen] = useState(false);
   const [adminEmail, setAdminEmail] = useState('');
@@ -104,7 +104,8 @@ function UsersContent() {
   const { data: session } = useSession();
   const isSuperAdmin = (session?.user as any)?.role === 'super_admin';
 
-  const fetchUsers = async (page = currentPage) => {
+  const fetchUsers = useCallback(async (page = currentPage) => {
+    await Promise.resolve();
     setLoading(true);
     try {
       const response = await fetch(`/api/admin/users?page=${page}&limit=20&search=${debouncedSearchTerm}`);
@@ -119,18 +120,14 @@ function UsersContent() {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchUsers(currentPage);
   }, [currentPage, debouncedSearchTerm]);
 
   useEffect(() => {
-    const pageFromParams = Math.max(1, parseInt(searchParams.get('page') || '1'));
-    if (pageFromParams !== currentPage) {
-      setCurrentPage(pageFromParams);
-    }
-  }, [searchParams]);
+    const loadData = async () => {
+      await fetchUsers(currentPage);
+    };
+    loadData();
+  }, [fetchUsers, currentPage]);
 
   const openUserDetails = (user: UserData) => {
     setSelectedUser(user);
@@ -268,12 +265,20 @@ function UsersContent() {
         <Input
           placeholder="Search name, email or phone..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            if (currentPage > 1) {
+              const params = new URLSearchParams(searchParams.toString());
+              params.delete('page');
+              router.push(`/admin/users?${params.toString()}`);
+            }
+          }}
           className="pl-9 h-11 rounded-xl border bg-white focus-visible:ring-primary/20 shadow-sm"
         />
       </div>
 
       <div className="rounded-2xl border shadow-sm overflow-hidden bg-white">
+        <div className="hidden md:block overflow-x-auto">
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow>
@@ -288,14 +293,24 @@ function UsersContent() {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={7} className="h-48 text-center">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="text-muted-foreground font-medium">Loading user data...</p>
-                  </div>
-                </TableCell>
-              </TableRow>
+              Array.from({ length: 6 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-10 w-10 rounded-full" /></TableCell>
+                  <TableCell>
+                    <div className="space-y-1.5">
+                      <Skeleton className="h-4 w-32 rounded" />
+                      <Skeleton className="h-3 w-40 rounded" />
+                    </div>
+                  </TableCell>
+                  <TableCell><Skeleton className="h-4 w-28 rounded" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-14 rounded-full" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-24 rounded" /></TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-8 w-8 rounded-md ml-auto" />
+                  </TableCell>
+                </TableRow>
+              ))
             ) : users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="h-48 text-center">
@@ -404,7 +419,7 @@ function UsersContent() {
                           )}
 
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive cursor-pointer font-medium">
+                          <DropdownMenuItem disabled className="text-destructive cursor-pointer font-medium">
                             <ShieldAlert className="mr-2 h-4 w-4" /> Suspend User
                           </DropdownMenuItem>
                           <DropdownMenuItem 
@@ -422,13 +437,160 @@ function UsersContent() {
             )}
           </TableBody>
         </Table>
+        </div>
+
+        {/* Mobile View */}
+        <div className="block md:hidden divide-y divide-border">
+          {loading ? (
+            <div className="space-y-3 p-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="p-4 border rounded-2xl shadow-sm space-y-3 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="space-y-1.5 flex-1">
+                      <Skeleton className="h-4 w-32 rounded" />
+                      <Skeleton className="h-3 w-40 rounded" />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : users.length === 0 ? (
+            <div className="py-8 text-center text-muted-foreground">
+              No users found.
+            </div>
+          ) : (
+            users.map((user) => (
+              <div key={user._id} className="p-4 flex flex-col gap-3 hover:bg-muted/30 transition-colors">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    {user.image && user.image !== '' ? (
+                      <div className="relative h-10 w-10 shrink-0 rounded-full overflow-hidden border">
+                        <Image 
+                          src={user.image} 
+                          alt={user.name} 
+                          width={40}
+                          height={40}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-10 w-10 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                        <UserIcon className="h-5 w-5" />
+                      </div>
+                    )}
+                    <div className="flex flex-col min-w-0">
+                      <button 
+                        onClick={() => openUserDetails(user)}
+                        className="font-bold text-sm text-slate-900 hover:text-primary transition-colors text-left truncate"
+                      >
+                        {user.name}
+                      </button>
+                      <span className="text-xs text-slate-500 truncate">{user.email}</span>
+                      <span className="text-[10px] text-slate-400 mt-0.5">
+                        Joined: {new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <Badge 
+                      variant={user.role === 'admin' || user.role === 'manager' ? 'default' : 'outline'}
+                      className={`
+                        capitalize px-2 py-0 rounded-full font-bold text-[9px] tracking-wider
+                        ${user.role === 'admin' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                        ${user.role === 'manager' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''}
+                      `}
+                    >
+                      {user.role}
+                    </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-primary/10 hover:text-primary">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuGroup>
+                          <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground px-2 py-1.5">User Actions</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => openUserDetails(user)} className="cursor-pointer">
+                            <Eye className="mr-2 h-4 w-4" /> View Details
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                        
+                        <DropdownMenuSeparator />
+                        
+                        <DropdownMenuGroup>
+                          <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground px-2 py-1.5">Management</DropdownMenuLabel>
+                          
+                          {user.role !== 'admin' && (
+                            <DropdownMenuItem 
+                              onClick={() => handleUpdateRole(user._id, 'admin')}
+                              className="cursor-pointer text-blue-600 font-bold"
+                            >
+                              <ShieldCheck className="mr-2 h-4 w-4" /> Make Admin
+                            </DropdownMenuItem>
+                          )}
+
+                          {user.role !== 'manager' && (
+                            <DropdownMenuItem 
+                              onClick={() => handleUpdateRole(user._id, 'manager')}
+                              className="cursor-pointer text-primary font-bold"
+                            >
+                              <UserCog className="mr-2 h-4 w-4" /> Make Manager
+                            </DropdownMenuItem>
+                          )}
+
+                          {user.role !== 'user' && (
+                            <DropdownMenuItem 
+                              onClick={() => handleUpdateRole(user._id, 'user')}
+                              className="cursor-pointer text-slate-600 font-bold"
+                            >
+                              <UserCog className="mr-2 h-4 w-4" /> Make User
+                            </DropdownMenuItem>
+                          )}
+
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem disabled className="text-destructive cursor-pointer font-medium">
+                            <ShieldAlert className="mr-2 h-4 w-4" /> Suspend User
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteUser(user._id, user.name)}
+                            className="text-destructive cursor-pointer font-bold bg-red-50 hover:bg-red-100 mt-1"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete User
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between bg-muted/40 p-2.5 rounded-lg border border-muted/50 mt-1">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-muted-foreground font-medium uppercase">Total Orders</span>
+                    <span className="font-bold text-sm text-slate-800">{user.totalOrders}</span>
+                  </div>
+                  <div className="w-px h-6 bg-border mx-2"></div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-[10px] text-muted-foreground font-medium uppercase">Total Spent</span>
+                    <span className="font-bold text-sm text-emerald-600">৳{user.totalSpent.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
         {totalPages > 1 && (
           <div className="py-6 border-t bg-white px-6">
             <Pagination 
               currentPage={currentPage} 
               totalPages={totalPages} 
               onPageChange={(page) => {
-                setCurrentPage(page);
                 const params = new URLSearchParams(searchParams.toString());
                 params.set('page', page.toString());
                 router.push(`?${params.toString()}`);
@@ -623,11 +785,7 @@ function UsersContent() {
 
 export default function UsersPage() {
   return (
-    <Suspense fallback={
-      <div className="flex h-[300px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    }>
+    <Suspense fallback={<AdminTableSkeleton rowCount={7} columnCount={7} titleWidth="w-56" showStats={true} />}>
       <UsersContent />
     </Suspense>
   );

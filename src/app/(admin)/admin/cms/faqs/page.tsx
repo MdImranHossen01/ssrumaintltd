@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -13,6 +13,7 @@ import {
 import { Plus, Edit, Trash, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import Swal from 'sweetalert2';
 
@@ -20,7 +21,7 @@ export default function FAQsPage() {
   const [faqs, setFaqs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchFaqs = async () => {
+  const fetchFaqs = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/faqs');
       if (!response.ok) {
@@ -34,11 +35,14 @@ export default function FAQsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchFaqs();
-  }, []);
+    const loadData = async () => {
+      await fetchFaqs();
+    };
+    loadData();
+  }, [fetchFaqs]);
 
   const handleDelete = async (id: string, question: string) => {
     const result = await Swal.fire({
@@ -109,6 +113,7 @@ export default function FAQsPage() {
       </div>
 
       <div className="rounded-md border bg-background overflow-hidden shadow-sm">
+        <div className="hidden md:block overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
@@ -120,14 +125,24 @@ export default function FAQsPage() {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={4} className="h-40 text-center">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">Loading FAQs...</p>
-                  </div>
-                </TableCell>
-              </TableRow>
+              Array.from({ length: 4 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <div className="space-y-1.5">
+                      <Skeleton className="h-4 w-48 rounded" />
+                      <Skeleton className="h-3 w-72 rounded" />
+                    </div>
+                  </TableCell>
+                  <TableCell><Skeleton className="h-4 w-10 rounded" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1">
+                      <Skeleton className="h-8 w-8 rounded-md" />
+                      <Skeleton className="h-8 w-8 rounded-md" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
             ) : faqs.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="h-40 text-center">
@@ -187,6 +202,70 @@ export default function FAQsPage() {
             )}
           </TableBody>
         </Table>
+        </div>
+
+        {/* Mobile View */}
+        <div className="block md:hidden divide-y divide-border">
+          {loading ? (
+            <div className="space-y-3 p-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="p-3 border rounded-xl space-y-2.5 animate-pulse">
+                  <Skeleton className="h-4 w-3/4 rounded" />
+                  <Skeleton className="h-3 w-full rounded" />
+                </div>
+              ))}
+            </div>
+          ) : faqs.length === 0 ? (
+            <div className="py-8 flex flex-col items-center justify-center gap-2 px-4 text-center">
+              <p className="text-base font-medium">No FAQs found</p>
+              <p className="text-xs text-muted-foreground">Add your first FAQ to get started.</p>
+              <Link href="/admin/cms/faqs/new" className="mt-2">
+                <Button variant="outline" size="sm">Add FAQ</Button>
+              </Link>
+            </div>
+          ) : (
+            faqs.map((faq) => (
+              <div key={faq._id} className="p-4 flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
+                  <span className="font-bold text-sm leading-snug">{faq.question}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground">
+                      Order: <Badge variant="outline" className="font-mono text-[10px] px-1">{faq.order}</Badge>
+                    </span>
+                    <button 
+                      onClick={() => toggleStatus(faq._id, faq.isActive)}
+                      className="transition-opacity hover:opacity-80 shrink-0"
+                    >
+                      <Badge variant={faq.isActive ? 'default' : 'secondary'} className="cursor-pointer text-[10px] px-1.5 py-0">
+                        {faq.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end gap-2 mt-1 pt-3 border-t border-muted/50">
+                  <Link href={`/admin/cms/faqs/${faq._id}/edit`}>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 hover:text-primary hover:bg-primary/10"
+                    >
+                      <Edit className="h-4 w-4 mr-1.5" /> Edit
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 text-rose-600 hover:text-rose-700 hover:bg-rose-50" 
+                    onClick={() => handleDelete(faq._id, faq.question)}
+                  >
+                    <Trash className="h-4 w-4 mr-1.5" /> Delete
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
-﻿import { format, isValid } from 'date-fns';
+import { format, isValid } from 'date-fns';
 
 export async function generateInvoicePDF(orderOrOrders: any | any[], settings: any, mode: 'download' | 'print' = 'download') {
   const orders = Array.isArray(orderOrOrders) ? orderOrOrders : [orderOrOrders];
   if (orders.length === 0) return;
 
-  const brandName = settings?.brandName || "SS Ruma International Ltd";
+  const brandName = settings?.brandName || "Rumas World";
   const brandEmail = settings?.contact?.email || "";
   const brandPhone = settings?.contact?.phone || "";
   const brandAddress = settings?.contact?.address || "";
@@ -324,26 +324,26 @@ export async function generateInvoicePDF(orderOrOrders: any | any[], settings: a
 
   const printWindow = window.open('', '_blank');
   if (printWindow) {
+    printWindow.document.open();
     printWindow.document.write(htmlContent);
     printWindow.document.close();
-    
-    // Allow fonts and stylesheets to load
-    printWindow.onload = () => {
-      printWindow.focus();
-      printWindow.print();
-      if (mode === 'print') {
-        printWindow.close();
-      }
-    };
-    // Fallback if onload doesn't fire immediately
-    setTimeout(() => {
-      if (printWindow.document.readyState === 'complete') {
+
+    const triggerPrint = () => {
+      try {
         printWindow.focus();
         printWindow.print();
-        if (mode === 'print') {
-          printWindow.close();
-        }
+      } catch (err) {
+        console.error('Print failed:', err);
       }
-    }, 1000);
+    };
+
+    if (printWindow.document.readyState === 'complete') {
+      setTimeout(triggerPrint, 300);
+    } else {
+      printWindow.onload = () => {
+        setTimeout(triggerPrint, 300);
+      };
+    }
   }
 }
+

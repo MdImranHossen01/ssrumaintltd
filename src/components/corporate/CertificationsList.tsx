@@ -49,8 +49,8 @@ export default function CertificationsList() {
                   <Award className="h-6 w-6" />
                 </div>
                 <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${cert.status === 'Active'
-                    ? 'bg-emerald-500/10 text-emerald-500'
-                    : 'bg-amber-500/10 text-amber-500'
+                  ? 'bg-emerald-500/10 text-emerald-500'
+                  : 'bg-amber-500/10 text-amber-500'
                   }`}>
                   {cert.status}
                 </span>

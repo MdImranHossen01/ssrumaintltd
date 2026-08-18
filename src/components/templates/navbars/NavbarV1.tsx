@@ -4,15 +4,28 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-
-  Menu
-
+  Menu,
+  User,
+  LogOut,
+  LayoutDashboard,
+  Settings,
+  Truck
 } from 'lucide-react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { toast } from 'sonner';
-
+import Image from 'next/image';
 
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 import { useAppSelector } from '@/store/hooks';
 
@@ -23,10 +36,10 @@ import { useSettings } from '@/components/SettingsProvider';
 
 const navItems = [
   { href: '/#home', label: 'Home' },
-  { href: '/about', label: 'About Us' },
+  { href: '/shop', label: 'Shop' },
   { href: '/services', label: 'Services' },
   { href: '/team', label: 'Team' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/about', label: 'About' },
 ];
 
 export default function Navbar() {
@@ -215,9 +228,9 @@ export default function Navbar() {
                   <span className="sr-only">Toggle mobile menu</span>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-[300px]">
-                  <nav className="flex flex-col gap-6 mt-12 px-2">
+                  <nav className="flex flex-col gap-4 mt-4 px-2">
                     <Logo onClick={() => setOpen(false)} />
-                    <div className="space-y-4 pt-6 border-t font-medium tracking-tight">
+                    <div className="space-y-3 pt-4 border-t font-medium tracking-tight">
                       {navItems.map((item) => {
                         const isActive = pathname === item.href || (item.href === '/#home' && pathname === '/');
                         return (
@@ -241,7 +254,7 @@ export default function Navbar() {
             </div>
 
             {/* Center/Left: Logo (Centered on mobile, left-aligned on desktop) */}
-            <div className="flex w-full md:w-auto justify-center md:justify-start items-center">
+            <div className="flex w-full md:w-auto md:flex-1 justify-center md:justify-start items-center">
               <Logo
                 imageClassName="size-10 md:size-14"
                 textClassName="text-[12px] sm:text-base md:text-2xl lg:text-3xl whitespace-nowrap truncate tracking-tighter"
@@ -249,8 +262,8 @@ export default function Navbar() {
               />
             </div>
 
-            {/* Right: Desktop Navigation Items */}
-            <nav className="hidden md:flex items-center">
+            {/* Center: Desktop Navigation Items */}
+            <nav className="hidden md:flex md:flex-1 justify-center items-center">
               <ul className="flex items-center gap-3 lg:gap-4">
                 {navItems.map((item) => {
                   const isActive = pathname === item.href || (item.href === '/#home' && pathname === '/');
@@ -270,6 +283,101 @@ export default function Navbar() {
                 })}
               </ul>
             </nav>
+
+            <div className="hidden md:flex md:flex-1 justify-end items-center">
+              {status === 'authenticated' && session?.user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger nativeButton={true} render={
+                    <Button variant="secondary" size="icon" className="rounded-full overflow-hidden border border-primary/20 cursor-pointer">
+                      {session.user.image ? (
+                        <Image
+                          src={session.user.image}
+                          alt={session.user.name || "User"}
+                          width={40}
+                          height={40}
+                          className="h-full w-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <User className="h-5 w-5" />
+                      )}
+                      <span className="sr-only">Toggle user menu</span>
+                    </Button>
+                  } />
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel>
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-bold leading-none">{session.user.name}</p>
+                          <p className="text-xs leading-none text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">
+                            {session.user.email}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      {(session.user as any)?.role === 'super_admin' && (
+                        <>
+                          <DropdownMenuItem asChild>
+                            <Link href="/admin/dashboard" className="flex items-center w-full cursor-pointer">
+                              <LayoutDashboard className="mr-2 h-4 w-4" />
+                              <span>Admin Dashboard</span>
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href="/admin/system-design" className="flex items-center w-full cursor-pointer">
+                              <Settings className="mr-2 h-4 w-4" />
+                              <span>Infrastructure & Marketing</span>
+                            </Link>
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                      {(session.user as any)?.role === 'admin' && (
+                        <>
+                          <DropdownMenuItem asChild>
+                            <Link href="/admin/dashboard" className="flex items-center w-full cursor-pointer">
+                              <LayoutDashboard className="mr-2 h-4 w-4" />
+                              <span>Admin Dashboard</span>
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href="/admin/orders" className="flex items-center w-full cursor-pointer">
+                              <Truck className="mr-2 h-4 w-4" />
+                              <span>Manage Orders</span>
+                            </Link>
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                      {(!session.user || ((session.user as any)?.role !== 'super_admin' && (session.user as any)?.role !== 'admin')) && (
+                        <DropdownMenuItem asChild>
+                          <Link href="/dashboard" className="flex items-center w-full cursor-pointer">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            <span>Dashboard</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      className="cursor-pointer"
+                      onClick={() => signOut({ callbackUrl: window.location.origin })}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link
+                  href="/login"
+                  className="text-[12px] font-bold uppercase tracking-[0.12em] text-white bg-primary hover:bg-primary/90 px-4 py-1.5 rounded-full shadow-md shadow-primary/20 transition-all"
+                >
+                  Login
+                </Link>
+              )}
+            </div>
 
           </div>
         </div>

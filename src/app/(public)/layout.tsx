@@ -3,6 +3,8 @@ import Footer from '@/components/layout/Footer';
 import { getCachedSettings } from '@/lib/data-fetching';
 import { headers } from 'next/headers';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
+import { MobileBottomNavbar } from '@/components/layout/MobileBottomNavbar';
+import { FloatingActions } from '@/components/layout/FloatingActions';
 import SubscriptionBlocker from '../components/SubscriptionBlocker';
 import { auth } from '@/auth';
 
@@ -39,6 +41,8 @@ export default async function PublicLayout({ children }: { children: React.React
       <main className="flex-1">{children}</main>
       <Footer style={ui.footer} />
       <ScrollToTop />
+      <MobileBottomNavbar />
+      <FloatingActions />
     </>
   );
 }

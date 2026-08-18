@@ -25,13 +25,7 @@ import { Separator } from '@/components/ui/separator';
 import { Loader2, CreditCard, Truck, ShoppingBag, CheckCircle2, Plus, Minus, X, Globe, ArrowRight, PartyPopper, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import { fbEvent } from '@/lib/fpixel';
 import { ttEvent } from '@/lib/tiktok';
 
@@ -641,14 +635,14 @@ function CheckoutContent() {
                   <div key={`${item.productId}-${item.color || 'no-color'}-${item.size || 'no-size'}-${index}`} className="flex gap-4 items-start relative group">
                     <div className="h-16 w-16 rounded-md border bg-muted flex-shrink-0 relative overflow-hidden">
                       {item.image && (
-                        <Image 
-                          src={item.image} 
-                          alt={item.name || 'Product'} 
-                          width={64} 
-                          height={64} 
+                        <Image
+                          src={item.image}
+                          alt={item.name || 'Product'}
+                          width={64}
+                          height={64}
                           priority={index === 0}
                           loading={index === 0 ? "eager" : "lazy"}
-                          className="h-full w-full object-cover" 
+                          className="h-full w-full object-cover"
                         />
                       )}
                     </div>
@@ -763,16 +757,16 @@ function CheckoutContent() {
                       <FormItem>
                         <FormLabel>মোবাইল নম্বর</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="যেমন: 017XXXXXXXX" 
-                            {...field} 
+                          <Input
+                            placeholder="যেমন: 017XXXXXXXX"
+                            {...field}
                             onChange={(e) => {
                               let value = e.target.value;
                               // Keep only English/Bangla digits and plus sign
                               let sanitized = value.replace(/[^\d০-৯+]/g, '');
                               field.onChange(sanitized);
                             }}
-                            className="h-11 focus-visible:ring-primary/20" 
+                            className="h-11 focus-visible:ring-primary/20"
                           />
                         </FormControl>
                         <FormMessage />
@@ -1053,8 +1047,8 @@ function CheckoutContent() {
                   <Button
                     type="submit"
                     className={`w-full h-14 rounded-full font-black uppercase tracking-widest text-sm transition-all ${isFormValid && !syncData?.hasInsufficientStock && !isPendingOrderBlocked
-                        ? 'bg-primary shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95'
-                        : 'bg-muted text-muted-foreground cursor-not-allowed opacity-70'
+                      ? 'bg-primary shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95'
+                      : 'bg-muted text-muted-foreground cursor-not-allowed opacity-70'
                       }`}
                     disabled={loading || !isFormValid || syncData?.hasInsufficientStock || isPendingOrderBlocked}
                   >
@@ -1153,8 +1147,8 @@ function CheckoutContent() {
                 type="button"
                 onClick={() => setPaymentDetailTab('phone')}
                 className={`flex-1 pb-1.5 text-[11px] font-bold text-center border-b-2 transition-all ${paymentDetailTab === 'phone'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200'
                   }`}
               >
                 {selectedMethod?.id === 'bkash' ? 'বিকাশ' : selectedMethod?.id === 'nagad' ? 'নগদ' : selectedMethod?.id === 'rocket' ? 'রকেট' : 'মোবাইল'} নম্বর দিয়ে
@@ -1163,8 +1157,8 @@ function CheckoutContent() {
                 type="button"
                 onClick={() => setPaymentDetailTab('trx')}
                 className={`flex-1 pb-1.5 text-[11px] font-bold text-center border-b-2 transition-all ${paymentDetailTab === 'trx'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200'
                   }`}
               >
                 ট্রানজেকশন আইডি (TrxID) দিয়ে

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { ProductForm } from '@/components/admin/ProductForm';
-import { Loader2 } from 'lucide-react';
+import { AdminFormSkeleton } from '@/components/admin/AdminSkeletons';
 import { toast } from 'sonner';
 
 export default function EditProductPage() {
@@ -44,11 +44,7 @@ export default function EditProductPage() {
   }, [slug]);
 
   if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <AdminFormSkeleton titleWidth="w-56" />;
   }
 
   if (!product) {

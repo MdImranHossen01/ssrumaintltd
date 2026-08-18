@@ -20,6 +20,7 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
 import Swal from 'sweetalert2';
@@ -158,14 +159,20 @@ export default function SubscribersPage() {
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={3} className="h-32 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                        <span>Loading subscribers...</span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Skeleton className="h-8 w-8 rounded-full" />
+                          <Skeleton className="h-4 w-48 rounded" />
+                        </div>
+                      </TableCell>
+                      <TableCell><Skeleton className="h-4 w-28 rounded" /></TableCell>
+                      <TableCell className="text-right">
+                        <Skeleton className="h-8 w-8 rounded-md ml-auto" />
+                      </TableCell>
+                    </TableRow>
+                  ))
                 ) : filteredSubscribers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={3} className="h-32 text-center text-muted-foreground font-medium">

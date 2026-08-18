@@ -31,6 +31,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Pagination } from '@/components/ui/pagination';
+import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import Swal from 'sweetalert2';
@@ -620,9 +621,45 @@ function AbandonedCartsContent() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="py-12 flex justify-center items-center text-muted-foreground gap-2">
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
-              Loading abandoned carts...
+            <div className="overflow-x-auto rounded-md border animate-pulse">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer Details</TableHead>
+                    <TableHead>Cart Items</TableHead>
+                    <TableHead>Total Amount</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell>
+                        <div className="space-y-1.5">
+                          <Skeleton className="h-4 w-32 rounded" />
+                          <Skeleton className="h-3 w-24 rounded" />
+                          <Skeleton className="h-3 w-20 rounded" />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1.5">
+                          <Skeleton className="h-4 w-28 rounded" />
+                          <Skeleton className="h-3 w-16 rounded" />
+                        </div>
+                      </TableCell>
+                      <TableCell><Skeleton className="h-4 w-16 rounded" /></TableCell>
+                      <TableCell><Skeleton className="h-3 w-24 rounded" /></TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Skeleton className="h-8 w-8 rounded-md" />
+                          <Skeleton className="h-8 w-8 rounded-md" />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : carts.length === 0 ? (
             <div className="py-12 text-center text-muted-foreground">

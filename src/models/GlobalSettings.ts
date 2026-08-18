@@ -82,7 +82,9 @@ export interface IGlobalSettings extends Document {
     categories?: string;
     productCard?: string;
     productDetail?: string;
+    blogDetail?: string;
     shopListing?: string;
+    blogListing?: string;
     footer?: string;
     theme?: string;
     logoFont?: string;
