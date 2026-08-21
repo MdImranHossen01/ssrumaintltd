@@ -57,7 +57,7 @@ jobs:
                 image: ${{ env.DOCKER_IMAGE_TAG }}
                 container_name: ssrumaintltd-app
                 restart: unless-stopped
-                mem_limit: 180m
+                mem_limit: 150m
                 mem_reservation: 80m
                 ports:
                   - "3001:3000"
@@ -66,7 +66,7 @@ jobs:
                 deploy:
                   resources:
                     limits:
-                      memory: 180M
+                      memory: 150M
                     reservations:
                       memory: 80M
                 logging:
