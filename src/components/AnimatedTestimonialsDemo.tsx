@@ -23,7 +23,7 @@ export function AnimatedTestimonialsDemo() {
         "The consultancy services provided by their team helped us establish a strong foothold in the market. Truly professional and insightful.",
       name: "Emily Watson",
       designation: "Operations Director, Pacific Ventures",
-      src: "https://images.unsplash.com/photo-1623582854588-d60de57fa33f?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      src: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=2592&auto=format&fit=crop",
       rating: 5,
     },
     {
