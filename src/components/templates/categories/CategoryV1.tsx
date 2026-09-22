@@ -26,7 +26,7 @@ function CategoryItem({ category }: { category: Category }) {
       className="group block"
     >
       <div className="flex flex-col items-center gap-3 py-2 transition-all hover:-translate-y-1">
-        <div className="relative h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 overflow-hidden rounded-full bg-background border border-muted shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+        <div className="relative h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 overflow-hidden rounded-full bg-background border-2 border-primary/50 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
           {category.image ? (
             <Image
               src={category.image}
@@ -137,11 +137,10 @@ export default function CategoryV1({ categories }: CategoryShowcaseProps) {
                 <button
                   key={index}
                   onClick={() => mobileApi?.scrollTo(index)}
-                  className={`transition-all duration-300 cursor-pointer rounded-full h-1.5 ${
-                    index === mobileIndex
-                      ? 'w-6 bg-primary'
-                      : 'w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                  }`}
+                  className={`transition-all duration-300 cursor-pointer rounded-full h-1.5 ${index === mobileIndex
+                    ? 'w-6 bg-primary'
+                    : 'w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                    }`}
                   aria-label={`Go to group ${index + 1}`}
                 />
               ))}
@@ -179,11 +178,10 @@ export default function CategoryV1({ categories }: CategoryShowcaseProps) {
                     <button
                       key={index}
                       onClick={() => desktopApi?.scrollTo(index)}
-                      className={`transition-all duration-300 cursor-pointer rounded-full h-1.5 ${
-                        index === desktopIndex
-                          ? 'w-8 bg-primary'
-                          : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                      }`}
+                      className={`transition-all duration-300 cursor-pointer rounded-full h-1.5 ${index === desktopIndex
+                        ? 'w-8 bg-primary'
+                        : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                        }`}
                       aria-label={`Go to group ${index + 1}`}
                     />
                   ))}
