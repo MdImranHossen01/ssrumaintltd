@@ -202,7 +202,7 @@ export default function ProductCardV3({ product: initialProduct, isFlashSale }: 
   const categoryName = mainCategory?.name || 'AMIRA BEAUTIFUL CARE';
 
   return (
-    <div className="w-full bg-card border border-border/40 rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group flex flex-col h-full relative">
+    <div className="w-full bg-card border border-border/40 rounded-none overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group flex flex-col h-full relative">
       {/* Image Area */}
       <div className="relative w-full aspect-[4/5] bg-muted/10 overflow-hidden">
         <Link href={`/product/${product.slug}`} className="relative block h-full w-full">
@@ -337,7 +337,7 @@ export default function ProductCardV3({ product: initialProduct, isFlashSale }: 
           <Button
             onClick={handleAddToCartClick}
             disabled={product.stock === 0}
-            className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors duration-200"
+            className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 rounded-none text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors duration-200"
           >
             <ShoppingBag className="h-4 w-4" />
             {product.stock === 0 ? 'Out' : 'Add'}
