@@ -4,8 +4,10 @@ import { headers } from 'next/headers';
 import { getCachedSettings, getCachedFAQs } from '@/lib/data-fetching';
 
 import { SyncedHeroSection } from '@/components/storefront/SyncedHeroSection';
+import { CategoryShowcase } from '@/components/storefront/CategoryShowcase';
 import { MediaGallerySection } from '@/components/corporate/MediaGallerySection';
 import { FAQSection } from '@/components/storefront/FAQSection';
+import { getCachedCategories } from '@/lib/data-fetching';
 
 import AboutSection from '@/components/corporate/AboutSection';
 import ServicesSection from '@/components/corporate/ServicesSection';
@@ -47,11 +49,15 @@ export default async function HomePage() {
   const brandName = settings?.brandName || 'SS Ruma International Ltd';
 
   const faqs = await getCachedFAQs();
+  const categories = await getCachedCategories();
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* 1. Hero Section */}
       <SyncedHeroSection />
+
+      {/* 2. Browse By Category */}
+      <CategoryShowcase style={settings?.uiTemplates?.categories || 'v1'} categories={categories} />
 
       {/* 7. Project Transformation (Compare) */}
       <TransformationSection />
