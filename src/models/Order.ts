@@ -9,6 +9,10 @@ export interface IOrderItem {
   image?: string;
   color?: string;
   size?: string;
+  batchesUsed?: {
+    batchNumber: string;
+    quantity: number;
+  }[];
 }
 
 export interface IOrder extends Document {
@@ -73,6 +77,12 @@ const OrderSchema: Schema<IOrder> = new Schema(
         image: { type: String },
         color: { type: String },
         size: { type: String },
+        batchesUsed: [
+          {
+            batchNumber: { type: String, required: true },
+            quantity: { type: Number, required: true, min: [1, 'Quantity must be at least 1'] },
+          }
+        ],
       },
     ],
     totalAmount: { type: Number, required: true, min: [0, 'Total amount cannot be negative'] },
@@ -125,6 +135,12 @@ const OrderSchema: Schema<IOrder> = new Schema(
   },
   { timestamps: true }
 );
+
+// Indexes for fast dashboard and report aggregation
+OrderSchema.index({ status: 1, createdAt: -1, deletedAt: 1, showroom: 1 });
+OrderSchema.index({ paymentMethod: 1, paymentStatus: 1, status: 1, deletedAt: 1 });
+OrderSchema.index({ user: 1, createdAt: -1, deletedAt: 1 });
+OrderSchema.index({ createdAt: -1, deletedAt: 1 });
 
 const Order: Model<IOrder> = mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
 

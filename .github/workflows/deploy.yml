@@ -1,4 +1,4 @@
-name: Deploy ssrumaintltd to DigitalOcean
+name: Deploy RumasWorld to DigitalOcean
 
 on:
   push:
@@ -26,6 +26,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Create .env file for build
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: |
+          echo "$ENV_FILE" > .env
+
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
@@ -50,15 +56,16 @@ jobs:
             mkdir -p ~/ssrumaintltd
             cd ~/ssrumaintltd
 
+            cat << 'EOF' > .env.local
+            ${{ secrets.ENV_FILE }}
+            EOF
+
             cat << 'EOF' > docker-compose.yml
-            version: '2.4'
             services:
               web:
                 image: ${{ env.DOCKER_IMAGE_TAG }}
                 container_name: ssrumaintltd-app
                 restart: unless-stopped
-                mem_limit: 150m
-                mem_reservation: 80m
                 ports:
                   - "3001:3000"
                 env_file:

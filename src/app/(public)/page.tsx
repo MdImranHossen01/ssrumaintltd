@@ -53,6 +53,12 @@ export default async function HomePage() {
       {/* 1. Hero Section */}
       <SyncedHeroSection />
 
+      {/* 7. Project Transformation (Compare) */}
+      <TransformationSection />
+
+      {/* 6. Our Projects */}
+      <ProjectsSection />
+
       {/* 2. About Us */}
       <AboutSection brandName={brandName} />
 
@@ -64,11 +70,9 @@ export default async function HomePage() {
       {/* 5. Our Certifications */}
       <CertificationsSection />
 
-      {/* 6. Our Projects */}
-      <ProjectsSection />
 
-      {/* 7. Project Transformation (Compare) */}
-      <TransformationSection />
+
+
 
       {/* 8. Media Gallery (Interactive 3D Globe) */}
       <MediaGallerySection />

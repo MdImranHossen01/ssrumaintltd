@@ -1,4 +1,4 @@
-﻿import { format, isValid } from 'date-fns';
+import { format, isValid } from 'date-fns';
 
 export function numberToWords(num: number): string {
   if (num === 0) return 'Zero';
@@ -51,7 +51,7 @@ export function numberToWords(num: number): string {
 }
 
 export async function generateBillPDF(bill: any, settings: any, mode: 'download' | 'print' = 'download') {
-  const brandName = settings?.brandName || "SS Ruma International Ltd";
+  const brandName = settings?.brandName || process.env.NEXT_PUBLIC_STORE_NAME || "Store";
   const brandEmail = settings?.contact?.email || "";
   const brandPhone = settings?.contact?.phone || "";
   const brandAddress = settings?.contact?.address || "";
@@ -383,7 +383,7 @@ export async function generateBillPDF(bill: any, settings: any, mode: 'download'
             </tbody>
           </table>
 
-          ${docType !== 'chalan' ? `
+          ${(docType !== 'chalan' || (bill.serviceFee && bill.serviceFee > 0)) ? `
             <div class="totals-container">
               <div class="totals-box">
                 <div class="total-row">
@@ -408,6 +408,18 @@ export async function generateBillPDF(bill: any, settings: any, mode: 'download'
                     <span>- ৳${Math.round(bill.discount)}</span>
                   </div>
                 ` : ''}
+                ${bill.couponCode && (bill.couponDiscount || 0) > 0 ? `
+                  <div class="total-row" style="color: var(--primary);">
+                    <span>Coupon (${bill.couponCode}):</span>
+                    <span>- ৳${Math.round(bill.couponDiscount).toLocaleString()}</span>
+                  </div>
+                ` : ''}
+                ${(bill.walletAmountUsed || 0) > 0 ? `
+                  <div class="total-row" style="color: var(--primary);">
+                    <span>Tokens Redeemed:</span>
+                    <span>- ৳${Math.round(bill.walletAmountUsed).toLocaleString()}</span>
+                  </div>
+                ` : ''}
                 <div class="total-row highlight">
                   <span>Total:</span>
                   <span>৳${Math.round(bill.total || 0)}</span>
@@ -425,12 +437,18 @@ export async function generateBillPDF(bill: any, settings: any, mode: 'download'
                     <span>৳${Math.round(bill.gTotal || 0)}</span>
                   </div>
                   <div class="total-row">
-                    <span>Paid Amount:</span>
-                    <span>৳${Math.round(bill.cashIn || 0)}</span>
+                    <span>Cash Received:</span>
+                    <span>৳${Math.round(bill.cashIn || 0).toLocaleString()}</span>
                   </div>
+                  ${(bill.cashIn || 0) > (bill.gTotal || 0) ? `
+                    <div class="total-row" style="color: #059669; font-weight: 700;">
+                      <span>Change Return:</span>
+                      <span>৳${Math.round((bill.cashIn || 0) - (bill.gTotal || 0)).toLocaleString()}</span>
+                    </div>
+                  ` : ''}
                   <div class="total-row highlight" style="${bill.currentBillDue > 0 ? 'color: #ef4444;' : 'color: var(--primary);'}">
                     <span>Remaining Due:</span>
-                    <span>৳${Math.round(bill.currentBillDue || 0)}</span>
+                    <span>৳${Math.round(bill.currentBillDue || 0).toLocaleString()}</span>
                   </div>
                 ` : ''}
               </div>
@@ -460,14 +478,20 @@ export async function generateBillPDF(bill: any, settings: any, mode: 'download'
       if (hasPrinted) return;
       hasPrinted = true;
       printWindow.focus();
+      printWindow.onafterprint = () => {
+        try {
+          printWindow.close();
+        } catch (e) {}
+      };
       printWindow.print();
-      if (mode === 'print') {
-        printWindow.close();
-      }
     };
 
     printWindow.onload = triggerPrint;
     
-    setTimeout(triggerPrint, 800);
+    setTimeout(() => {
+      if (!hasPrinted) {
+        triggerPrint();
+      }
+    }, 500);
   }
 }

@@ -25,21 +25,6 @@ export function AarongPromoBanners() {
               className="object-cover transition-transform duration-[1000ms] ease-out group-hover:scale-105"
               priority
             />
-            {/* Subtle Overlay */}
-            <div className="absolute inset-0 bg-black/10 transition-colors duration-500 group-hover:bg-black/20" />
-            
-            {/* Content overlay */}
-            <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 sm:pb-12 text-center text-white px-4">
-              <h3 className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-bold tracking-wide font-serif mb-1 drop-shadow-sm">
-                Bronze ballad
-              </h3>
-              <p className="text-xs sm:text-sm font-light tracking-widest uppercase mb-4 opacity-90">
-                Explore living
-              </p>
-              <span className="inline-block bg-black text-white hover:bg-neutral-900 transition-colors px-6 py-2.5 text-xs font-black uppercase tracking-[0.2em]">
-                SHOP NOW
-              </span>
-            </div>
           </Link>
 
           {/* Right Banner */}
@@ -55,21 +40,6 @@ export function AarongPromoBanners() {
               className="object-cover transition-transform duration-[1000ms] ease-out group-hover:scale-105"
               priority
             />
-            {/* Subtle Overlay */}
-            <div className="absolute inset-0 bg-black/10 transition-colors duration-500 group-hover:bg-black/20" />
-            
-            {/* Content overlay */}
-            <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 sm:pb-12 text-center text-white px-4">
-              <h3 className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-bold tracking-wide font-serif mb-1 drop-shadow-sm">
-                Tales in taupe
-              </h3>
-              <p className="text-xs sm:text-sm font-light tracking-widest uppercase mb-4 opacity-90">
-                Explore dining
-              </p>
-              <span className="inline-block bg-black text-white hover:bg-neutral-900 transition-colors px-6 py-2.5 text-xs font-black uppercase tracking-[0.2em]">
-                SHOP NOW
-              </span>
-            </div>
           </Link>
 
         </div>

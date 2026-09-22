@@ -65,7 +65,8 @@ export async function POST(req: NextRequest) {
     const context = await retrieveRelevantContext(latestMessage, (session?.user as any)?.id, apiKey);
     console.log("RAG Context retrieved, length:", context ? context.length : 0);
 
-    const response = await getChatResponse(latestMessage, history, context, apiKey);
+    const storeName = settings?.brandName || process.env.NEXT_PUBLIC_STORE_NAME || 'Store';
+    const response = await getChatResponse(latestMessage, history, context, apiKey, storeName);
 
     return NextResponse.json({ message: response });
   } catch (error: any) {

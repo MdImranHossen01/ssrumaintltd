@@ -1,13 +1,16 @@
 'use server'
 
 import connectToDatabase from '@/lib/db';
+import Blog from '@/models/Blog';
 import Product from '@/models/Product';
 
-export async function trackView(id: string, type: 'product') {
+export async function trackView(id: string, type: 'product' | 'blog') {
   try {
     await connectToDatabase();
     
-    if (type === 'product') {
+    if (type === 'blog') {
+      await Blog.updateOne({ _id: id }, { $inc: { views: 1 } });
+    } else if (type === 'product') {
       await Product.updateOne({ _id: id }, { $inc: { views: 1 } });
     }
     

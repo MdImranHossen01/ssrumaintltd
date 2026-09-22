@@ -9,28 +9,30 @@ async function getBaseUrl() {
 
 export async function generateOrganizationSchema(settings: any) {
   const baseUrl = await getBaseUrl();
+  const brandName = settings?.brandName || process.env.NEXT_PUBLIC_STORE_NAME || 'Store';
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: settings.brandName || 'SS Ruma International Ltd',
+    name: brandName,
     url: baseUrl,
-    logo: settings.logo,
+    logo: settings?.logo || settings?.logoUrl || '/logo.webp',
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: settings.contact?.phone,
+      telephone: settings?.contact?.phone,
       contactType: 'customer service',
-      email: settings.contact?.email,
+      email: settings?.contact?.email,
     },
     address: {
       '@type': 'PostalAddress',
-      streetAddress: settings.contact?.address,
+      streetAddress: settings?.contact?.address,
     },
   };
 }
 
-export async function generateProductSchema(product: any) {
+export async function generateProductSchema(product: any, brandName?: string) {
   const price = product.salePrice ?? product.price;
   const baseUrl = await getBaseUrl();
+  const resolvedBrand = brandName || process.env.NEXT_PUBLIC_STORE_NAME || 'Store';
 
   return {
     '@context': 'https://schema.org',
@@ -41,7 +43,7 @@ export async function generateProductSchema(product: any) {
     sku: product.sku,
     brand: {
       '@type': 'Brand',
-      name: 'SS Ruma International Ltd',
+      name: resolvedBrand,
     },
     offers: {
       '@type': 'Offer',
@@ -67,4 +69,22 @@ export function generateBreadcrumbSchema(items: { name: string; item: string }[]
   };
 }
 
+export async function generateBlogSchema(blog: any, brandName?: string) {
+  const baseUrl = await getBaseUrl();
+  const resolvedBrand = brandName || process.env.NEXT_PUBLIC_STORE_NAME || 'Store';
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: blog.title,
+    image: blog.thumbnail ? [blog.thumbnail] : [],
+    datePublished: blog.createdAt,
+    dateModified: blog.updatedAt || blog.createdAt,
+    author: {
+      '@type': 'Organization',
+      name: resolvedBrand,
+    },
+    description: blog.metaDescription || blog.title,
+    url: `${baseUrl}/blog/${blog.slug}`,
+  };
+}
 

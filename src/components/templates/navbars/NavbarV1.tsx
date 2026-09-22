@@ -287,7 +287,7 @@ export default function Navbar() {
             <div className="hidden md:flex md:flex-1 justify-end items-center">
               {status === 'authenticated' && session?.user ? (
                 <DropdownMenu>
-                  <DropdownMenuTrigger nativeButton={true} render={
+                  <DropdownMenuTrigger asChild>
                     <Button variant="secondary" size="icon" className="rounded-full overflow-hidden border border-primary/20 cursor-pointer">
                       {session.user.image ? (
                         <Image
@@ -303,7 +303,7 @@ export default function Navbar() {
                       )}
                       <span className="sr-only">Toggle user menu</span>
                     </Button>
-                  } />
+                  </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuGroup>
                       <DropdownMenuLabel>

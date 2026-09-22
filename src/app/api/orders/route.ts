@@ -8,6 +8,7 @@ import GlobalSettings from '@/models/GlobalSettings';
 import WalletTransaction from '@/models/WalletTransaction';
 import Coupon from '@/models/Coupon';
 import { auth } from '@/auth';
+import { normalizePhoneNumber } from '@/lib/utils';
 
 import { z } from 'zod';
 import mongoose from 'mongoose';
@@ -37,7 +38,7 @@ const orderSchema = z.object({
   items: z.array(orderItemSchema).min(1, 'At least one item is required'),
   shippingAddress: z.object({
     fullName: z.string().min(2, 'Full name is required'),
-    phone: z.string().min(10, 'Invalid phone number'),
+    phone: z.string().transform((val) => normalizePhoneNumber(val)).refine((val) => val.length === 11, 'Invalid phone number'),
     email: z.string().email('Invalid email address'),
     street: z.string().min(1, 'Street is required'),
     city: z.string().min(1, 'City is required'),
@@ -54,7 +55,7 @@ const orderSchema = z.object({
       }
     }
     return val;
-  }, z.enum(['COD', 'Online', 'Manual'])),
+  }, z.enum(['COD', 'Online', 'Manual', 'Credit'])),
   deliveryCharge: z.number().min(0).nullish(),
   useWallet: z.boolean().nullish().default(false),
   couponCode: z.string().nullish(),
@@ -63,6 +64,8 @@ const orderSchema = z.object({
     senderNumber: z.string().optional(),
     transactionId: z.string().optional(),
   }).optional(),
+  isCreditOrder: z.boolean().nullish().default(false),
+  expectedPaymentDate: z.string().nullish(),
 });
 
 export async function POST(req: NextRequest) {
@@ -82,7 +85,7 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    const { items, shippingAddress, paymentMethod, useWallet, couponCode, manualPaymentDetails } = validation.data;
+    const { items, shippingAddress, paymentMethod, useWallet, couponCode, manualPaymentDetails, isCreditOrder, expectedPaymentDate } = validation.data;
     const clientProvidedDeliveryCharge = validation.data.deliveryCharge;
 
     await connectToDatabase();
@@ -220,67 +223,99 @@ export async function POST(req: NextRequest) {
         let product;
         const hasVariant = !!(item.color || item.size);
 
+        product = await Product.findOne({ _id: item.product, isPublished: true }).session(session);
+        if (!product) {
+          throw new StockError(`Product not found: ${item.name}`);
+        }
+
+        const batchesUsed: { batchNumber: string; quantity: number; }[] = [];
+        let remainingQty = item.quantity;
+
         if (hasVariant) {
-          const variantQuery: any = {
-            _id: item.product,
-            isPublished: true,
-            variants: {
-              $elemMatch: {
-                ...(item.color && { color: item.color }),
-                ...(item.size && { size: item.size }),
-                stock: { $gte: item.quantity }
+          const variant = product.variants?.find((v: any) =>
+            String(v.color || '').trim() === String(item.color || '').trim() &&
+            String(v.size || '').trim() === String(item.size || '').trim()
+          );
+
+          if (!variant || (variant.stock || 0) < item.quantity) {
+            throw new StockError(`Stock deduction failed unexpectedly for ${item.name}.`);
+          }
+
+          variant.stock -= item.quantity;
+
+          if (variant.batches && variant.batches.length > 0) {
+            const sortedBatches = [...variant.batches].sort((a, b) => {
+              if (!a.expiryDate) return 1;
+              if (!b.expiryDate) return -1;
+              return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+            });
+
+            for (const batch of sortedBatches) {
+              if (remainingQty <= 0) break;
+              if (batch.stock > 0) {
+                const qtyToTake = Math.min(batch.stock, remainingQty);
+                batchesUsed.push({ batchNumber: batch.batchNumber, quantity: qtyToTake });
+                remainingQty -= qtyToTake;
+                const originalBatch = variant.batches.find((b: any) => b.batchNumber === batch.batchNumber);
+                if (originalBatch) originalBatch.stock -= qtyToTake;
               }
             }
-          };
-
-          product = await Product.findOneAndUpdate(
-            variantQuery,
-            { $inc: { "variants.$.stock": -item.quantity } },
-            { session, new: true }
-          );
-
-          if (product) {
-            const variant = product.variants?.find((v: any) =>
-              String(v.color || '').trim() === String(item.color || '').trim() &&
-              String(v.size || '').trim() === String(item.size || '').trim()
-            );
-            successfulDeductions.push({
-              productId: product._id.toString(),
-              quantity: item.quantity,
-              variantId: (variant as any)?._id?.toString()
-            });
           }
+
+          successfulDeductions.push({
+            productId: product._id.toString(),
+            quantity: item.quantity,
+            variantId: (variant as any)?._id?.toString(),
+            batchesUsed
+          } as any);
+
         } else {
-          product = await Product.findOneAndUpdate(
-            {
-              _id: item.product,
-              stock: { $gte: item.quantity },
-              isPublished: true
-            },
-            { $inc: { stock: -item.quantity } },
-            { session, new: true }
-          );
-
-          if (product) {
-            successfulDeductions.push({
-              productId: product._id.toString(),
-              quantity: item.quantity
-            });
+          if ((product.stock || 0) < item.quantity) {
+            throw new StockError(`Stock deduction failed unexpectedly for ${item.name}.`);
           }
+
+          product.stock -= item.quantity;
+
+          if (product.batches && product.batches.length > 0) {
+            const sortedBatches = [...product.batches].sort((a, b) => {
+              if (!a.expiryDate) return 1;
+              if (!b.expiryDate) return -1;
+              return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+            });
+
+            for (const batch of sortedBatches) {
+              if (remainingQty <= 0) break;
+              if (batch.stock > 0) {
+                const qtyToTake = Math.min(batch.stock, remainingQty);
+                batchesUsed.push({ batchNumber: batch.batchNumber, quantity: qtyToTake });
+                remainingQty -= qtyToTake;
+                const originalBatch = product.batches.find((b: any) => b.batchNumber === batch.batchNumber);
+                if (originalBatch) originalBatch.stock -= qtyToTake;
+              }
+            }
+          }
+
+          successfulDeductions.push({
+            productId: product._id.toString(),
+            quantity: item.quantity,
+            batchesUsed
+          } as any);
         }
 
-        if (!product) {
-          throw new StockError(`Stock deduction failed unexpectedly for ${item.name}. Please try again.`);
-        }
+        await product.save({ session });
       }
 
       // 2d. Price Verification and Validated Items List (using ORIGINAL items for order structure)
+      const isWholesalerUser = (sessionUser?.user as any)?.role === 'wholesaler';
+
       for (const item of items) {
         const product = await Product.findOne({ _id: item.product }).session(session);
         if (!product) throw new Error('Product not found during price verification');
 
         const hasVariant = !!(item.color || item.size);
-        let itemPrice = product.salePrice ?? product.price;
+        let itemPrice = isWholesalerUser
+          ? (product.wholesaleSalePrice ?? product.wholesalePrice ?? product.salePrice ?? product.price)
+          : (product.salePrice ?? product.price);
         let itemPurchasePrice = product.purchasePrice ?? 0;
 
         if (hasVariant) {
@@ -289,12 +324,24 @@ export async function POST(req: NextRequest) {
             String(v.size || '').trim() === String(item.size || '').trim()
           );
           if (variant) {
-            itemPrice = (variant.salePrice ?? variant.price) ?? (product.salePrice ?? product.price);
+            itemPrice = isWholesalerUser
+              ? ((variant.wholesaleSalePrice ?? variant.wholesalePrice) ?? (variant.salePrice ?? variant.price) ?? (product.wholesaleSalePrice ?? product.wholesalePrice ?? product.salePrice ?? product.price))
+              : ((variant.salePrice ?? variant.price) ?? (product.salePrice ?? product.price));
             itemPurchasePrice = variant.purchasePrice ?? product.purchasePrice ?? 0;
           }
         }
 
         serverComputedTotal += itemPrice * item.quantity;
+
+        // Find the matched deduction to get batchesUsed
+        const matchedDeduction = successfulDeductions.find(d => 
+          d.productId === product._id.toString() && 
+          (!hasVariant || d.variantId === (product.variants?.find((v: any) =>
+            String(v.color || '').trim() === String(item.color || '').trim() &&
+            String(v.size || '').trim() === String(item.size || '').trim()
+          ) as any)?._id?.toString())
+        );
+        const batchesUsed = (matchedDeduction as any)?.batchesUsed || [];
 
         validatedItems.push({
           product: product._id,
@@ -305,6 +352,7 @@ export async function POST(req: NextRequest) {
           image: item.image || product.images?.[0] || '',
           color: item.color,
           size: item.size,
+          batchesUsed: batchesUsed.length > 0 ? batchesUsed : undefined,
         });
       }
     } catch (err: any) {
@@ -443,6 +491,8 @@ export async function POST(req: NextRequest) {
           transactionId: paymentMethod === 'Online' ? `ORDER-${crypto.randomUUID().replace(/-/g, '').toUpperCase().slice(0, 16)}` : undefined,
           shortId: crypto.randomBytes(4).toString('hex').toUpperCase(),
           manualPaymentDetails,
+          isCreditOrder: !!isCreditOrder,
+          expectedPaymentDate: expectedPaymentDate ? new Date(expectedPaymentDate) : undefined,
         },
       ],
       { session }
@@ -543,7 +593,20 @@ export async function GET(req: NextRequest) {
     let query: any = { deletedAt: null };
     if (fetchAll && isAdmin) {
       if (status && status !== 'All') {
-        query.status = status;
+        if (status === 'Credit') {
+          query.$and = query.$and || [];
+          query.$and.push({
+            $or: [{ paymentMethod: 'Credit' }, { isCreditOrder: true }]
+          });
+        } else if (status === 'Due') {
+          query.$and = query.$and || [];
+          query.$and.push({
+            $or: [{ paymentMethod: 'Credit' }, { isCreditOrder: true }],
+            paymentStatus: { $ne: 'Paid' }
+          });
+        } else {
+          query.status = status;
+        }
       }
       if (fromDate || toDate) {
         query.createdAt = {};
@@ -599,12 +662,26 @@ export async function GET(req: NextRequest) {
       ready: 0,
       released: 0,
       delivered: 0,
-      cancelled: 0
+      cancelled: 0,
+      credit: 0,
+      due: 0
     };
 
     if (fetchAll && isAdmin) {
       const countQuery = { ...query };
       delete countQuery.status; // Remove status filter to count all
+      // If status was Credit or Due, also remove the condition added to $and
+      if (countQuery.$and) {
+        countQuery.$and = countQuery.$and.filter((cond: any) => {
+          if (cond.$or && cond.$or.some((o: any) => o.paymentMethod === 'Credit' || o.isCreditOrder === true)) {
+            return false;
+          }
+          return true;
+        });
+        if (countQuery.$and.length === 0) {
+          delete countQuery.$and;
+        }
+      }
 
       const statusCounts = await Order.aggregate([
         { $match: countQuery },
@@ -623,6 +700,26 @@ export async function GET(req: NextRequest) {
         else if (sc._id === 'Delivered') counts.delivered = sc.count;
         else if (sc._id === 'Cancelled') counts.cancelled = sc.count;
       });
+
+      // Count Credit orders
+      const creditQuery = {
+        ...countQuery,
+        $and: [
+          ...(countQuery.$and || []),
+          { $or: [{ paymentMethod: 'Credit' }, { isCreditOrder: true }] }
+        ]
+      };
+      counts.credit = await Order.countDocuments(creditQuery);
+
+      // Count Due orders
+      const dueQuery = {
+        ...countQuery,
+        $and: [
+          ...(countQuery.$and || []),
+          { $or: [{ paymentMethod: 'Credit' }, { isCreditOrder: true }], paymentStatus: { $ne: 'Paid' } }
+        ]
+      };
+      counts.due = await Order.countDocuments(dueQuery);
     }
     
     let ordersQuery = Order.find(query).sort({ createdAt: -1 });

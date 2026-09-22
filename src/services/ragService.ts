@@ -3,6 +3,7 @@ import { getEmbedding } from '@/lib/embeddings';
 
 // Import Mongoose models
 import Product from '@/models/Product';
+import Blog from '@/models/Blog';
 import FAQ from '@/models/FAQ';
 import Order from '@/models/Order';
 import Category from '@/models/Category';
@@ -87,13 +88,22 @@ export async function retrieveRelevantContext(
       }
     };
 
-    // 1. Queue searches for products and FAQs
+    // 1. Queue searches for products, blogs, and FAQs
     retrievalPromises.push(
       searchModel(
         Product,
         'Product',
         (doc) => `Product: ${doc.name}. Price: ${doc.price} BDT. Sale Price: ${doc.salePrice || 'N/A'} BDT. SKU: ${doc.sku}. Stock: ${doc.stock}. Description: ${doc.description}`,
         (doc) => `/product/${doc.slug || doc._id}`
+      )
+    );
+
+    retrievalPromises.push(
+      searchModel(
+        Blog,
+        'Blog',
+        (doc) => `Blog: ${doc.title}. Description: ${doc.metaDescription || ''}. Content Summary: ${doc.content.substring(0, 300)}...`,
+        (doc) => `/blog/${doc.slug || doc._id}`
       )
     );
 
@@ -111,7 +121,7 @@ export async function retrieveRelevantContext(
     const mergedResults = allResultsGroups.flat();
 
     // 2. Format outputs into a context string for the LLM
-    let contextString = "Here is the relevant real-time data from SS Ruma International Ltd's database:\n\n";
+    let contextString = "Here is the relevant real-time data from the store's database:\n\n";
 
     // Direct lookup for Order Tracking
     // Match phone numbers or 5+ digit numeric strings (order shortIds)

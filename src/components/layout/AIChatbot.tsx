@@ -1,11 +1,13 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, X, Bot, User, Loader2, MessageCircleQuestion } from 'lucide-react';
+import { Send, X, Bot, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+import { useSettings } from '@/components/SettingsProvider';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -13,6 +15,8 @@ interface Message {
 }
 
 export function AIChatbot() {
+  const { brandName } = useSettings();
+  const storeName = brandName || process.env.NEXT_PUBLIC_STORE_NAME || 'Store';
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
 
@@ -61,9 +65,13 @@ export function AIChatbot() {
 
     return parts.length > 0 ? parts : content;
   };
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Hi there! I am your SS Ruma International Ltd assistant. How can I help you today?' },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    setMessages([
+      { role: 'assistant', content: `হ্যালো! আমি ${storeName} এর এআই অ্যাসিস্ট্যান্ট। আজ আপনাকে কীভাবে সাহায্য করতে পারি?` }
+    ]);
+  }, [storeName]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -148,7 +156,7 @@ export function AIChatbot() {
                   <Bot className="size-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm">SS Ruma International Ltd</h3>
+                  <h3 className="font-bold text-sm">{storeName} AI</h3>
                   <p className="text-[10px] text-primary-foreground/70">Always active for you</p>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import {
   Geist,
   Geist_Mono
@@ -81,18 +81,23 @@ export async function generateMetadata(): Promise<Metadata> {
   const hostname = headersList.get('host') || 'localhost';
   const baseUrl = `https://${hostname}`;
 
+  const fallbackBrandName = process.env.NEXT_PUBLIC_STORE_NAME || "Store";
+
   try {
     const settings = await getCachedSettings();
 
     if (!settings) throw new Error("No settings found");
 
+    const brandName = settings.brandName || fallbackBrandName;
+    const metaTitle = settings.metaTitle || brandName;
+
     return {
       metadataBase: new URL(baseUrl),
       title: {
-        default: settings.metaTitle || settings.brandName,
+        default: metaTitle,
         template: `%s`,
       },
-      description: settings.metaDescription || settings.brandName || "Your ultimate destination for quality products.",
+      description: settings.metaDescription || brandName || "Your ultimate destination for quality products.",
       manifest: '/manifest.json',
       icons: {
         icon: settings.logoUrl || '/favicon.ico',
@@ -102,22 +107,22 @@ export async function generateMetadata(): Promise<Metadata> {
       appleWebApp: {
         capable: true,
         statusBarStyle: 'default',
-        title: settings.brandName || "SS Ruma International Ltd",
+        title: brandName,
       },
       formatDetection: {
         telephone: false,
       },
       openGraph: {
-        title: settings.metaTitle || settings.brandName || "SS Ruma International Ltd",
-        description: settings.metaDescription || settings.brandName || "Your ultimate destination for quality products.",
+        title: metaTitle,
+        description: settings.metaDescription || brandName || "Your ultimate destination for quality products.",
         url: baseUrl,
-        siteName: settings.brandName || "SS Ruma International Ltd",
+        siteName: brandName,
         type: 'website',
       },
       twitter: {
         card: 'summary_large_image',
-        title: settings.metaTitle || settings.brandName || "SS Ruma International Ltd",
-        description: settings.metaDescription || settings.brandName || "Your ultimate destination for quality products.",
+        title: metaTitle,
+        description: settings.metaDescription || brandName || "Your ultimate destination for quality products.",
       },
       verification: {
         google: settings.searchConsoleMeta,
@@ -133,7 +138,7 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   } catch (error) {
     return {
-      title: "SS Ruma International Ltd",
+      title: fallbackBrandName,
       description: "Your ultimate destination for quality products.",
     };
   }
