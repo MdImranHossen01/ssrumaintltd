@@ -145,7 +145,7 @@ export function ShowroomSidebar({ ...props }: React.ComponentProps<typeof Sideba
     <Sidebar {...props}>
       <SidebarHeader className="border-b h-14 lg:h-[60px] px-4 flex items-center">
         <Link href="/showroom/dashboard">
-          <Logo />
+          <Logo isSmallText={true} />
         </Link>
       </SidebarHeader>
       <SidebarContent>

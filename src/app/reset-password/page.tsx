@@ -283,8 +283,8 @@ export default function ResetPasswordPage() {  const { t } = useLanguage();
 
       {/* Right Side: Reset Password Form */}
       <div className="flex flex-col p-6 md:p-10 bg-background lg:ml-[50%] min-h-screen">
-        <div className="flex justify-center gap-2 md:justify-start mb-8">
-          <Logo />
+        <div className="flex justify-center gap-2 md:justify-start mb-10 md:mb-12">
+          <Logo isSmallText={true} className="scale-125 md:scale-150 origin-top md:origin-top-left" />
         </div>
 
         <motion.div

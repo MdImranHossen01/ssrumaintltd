@@ -151,7 +151,7 @@ export function EmployeeSidebar({ ...props }: React.ComponentProps<typeof Sideba
     <Sidebar {...props}>
       <SidebarHeader className="border-b h-14 lg:h-[60px] px-4 flex items-center">
         <Link href="/employee/dashboard">
-          <Logo />
+          <Logo isSmallText={true} />
         </Link>
       </SidebarHeader>
       <SidebarContent>

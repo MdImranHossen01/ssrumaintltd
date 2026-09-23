@@ -532,7 +532,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader className="border-b h-14 lg:h-[60px] px-4 flex items-center relative">
-        <Logo textClassName="text-sm md:text-base font-black tracking-wide whitespace-nowrap" />
+        <Logo textClassName="text-sm md:text-base font-black tracking-wide whitespace-nowrap" isSmallText={true} />
         <Button
           variant="ghost"
           size="icon"

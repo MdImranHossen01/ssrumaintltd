@@ -137,8 +137,8 @@ export default function RegisterPage() {  const { t } = useLanguage();
     <div className="relative min-h-screen">
       {/* Register Form centered */}
       <div className="flex flex-col p-6 md:p-10 bg-background min-h-screen items-center justify-center w-full">
-        <div className="flex justify-center mb-8">
-          <Logo />
+        <div className="flex justify-center mb-10 md:mb-12">
+          <Logo isSmallText={true} className="scale-125 md:scale-150 origin-top" />
         </div>
 
         <motion.div

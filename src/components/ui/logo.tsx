@@ -15,9 +15,10 @@ interface LogoProps {
   sizes?: string;
   src?: string;
   href?: string;
+  isSmallText?: boolean;
 }
 
-export function Logo({ className, imageClassName, textClassName, showText = true, onClick, sizes, src, href }: LogoProps) {
+export function Logo({ className, imageClassName, textClassName, showText = true, onClick, sizes, src, href, isSmallText }: LogoProps) {
   const { brandName, logoUrl } = useSettings();
 
   const finalBrandName = brandName || "Palli Vita Nutrition Hub";
@@ -38,10 +39,16 @@ export function Logo({ className, imageClassName, textClassName, showText = true
       </div>
       {showText && (
         <div className="flex flex-col text-left leading-[1.1] shrink-0">
-          <span className="text-[16px] md:text-[20px] lg:text-[22px] uppercase text-foreground transition-colors group-hover:text-primary tracking-wider font-logo font-medium">
+          <span className={cn(
+            "uppercase text-foreground transition-colors group-hover:text-primary tracking-wider font-logo font-medium",
+            isSmallText ? "text-[13px] md:text-[14px] lg:text-[15px]" : "text-[16px] md:text-[20px] lg:text-[22px]"
+          )}>
             S S Ruma
           </span>
-          <span className="text-[14px] md:text-[16px] lg:text-[18px] uppercase text-foreground/80 transition-colors group-hover:text-primary tracking-widest font-logo font-normal">
+          <span className={cn(
+            "uppercase text-foreground/80 transition-colors group-hover:text-primary tracking-widest font-logo font-normal",
+            isSmallText ? "text-[11px] md:text-[11px] lg:text-[12px]" : "text-[14px] md:text-[16px] lg:text-[18px]"
+          )}>
             International Ltd
           </span>
         </div>
