@@ -8,10 +8,9 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, GalleryVerticalEnd, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -31,11 +30,13 @@ import {
 } from '@/components/ui/tooltip';
 import { Logo } from '@/components/ui/logo';
 
+import { normalizePhoneNumber } from '@/lib/utils';
+
 const loginSchema = z.object({
   email: z.string().min(1, { message: 'Email or phone number is required' }).refine(
     (val) => {
       const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
-      const isPhone = /^[0-9]{11,}$/.test(val);
+      const isPhone = normalizePhoneNumber(val).length >= 11;
       return isEmail || isPhone;
     },
     { message: 'Please enter a valid email or phone number' }
@@ -93,8 +94,11 @@ export default function LoginPage() {
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     setIsLoading(true);
     try {
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email);
+      const finalIdentifier = isEmail ? values.email : normalizePhoneNumber(values.email);
+
       const response = await signIn('credentials', {
-        email: values.email,
+        email: finalIdentifier,
         password: values.password,
         redirect: false,
       });
