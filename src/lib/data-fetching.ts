@@ -2,6 +2,7 @@ import { unstable_cache } from 'next/cache';
 import connectToDatabase from './db';
 import Product from '@/models/Product';
 import Category from '@/models/Category';
+import Brand from '@/models/Brand';
 import Banner from '@/models/Banner';
 import Blog from '@/models/Blog';
 import FAQ from '@/models/FAQ';
@@ -31,14 +32,17 @@ export const getCachedProducts = (query = {}, limit = 10, sort: any = { createdA
   return unstable_cache(
     async () => {
       await connectToDatabase();
-      const products = await Product.find({ isPublished: true, ...query })
-        .populate('categories')
+      if (!Brand) {}
+      const products = await Product.find({ isPublished: { $ne: false }, ...query })
+        .select('-embedding -description -batches -variants.batches -attributes -showroomStocks')
+        .populate('categories', 'name slug parentCategory isActive')
+        .populate('brand', 'name slug image isActive')
         .sort(sort as any)
         .limit(limit)
         .lean();
       return serialize(products);
     },
-    ['products-list', JSON.stringify(query), limit.toString(), JSON.stringify(sort)],
+    ['products-list-v2', JSON.stringify(query), limit.toString(), JSON.stringify(sort)],
     { revalidate: 31536000, tags: [CACHE_TAGS.products] }
   )();
 };
@@ -47,12 +51,25 @@ export const getCachedProductBySlug = (slug: string) => {
   return unstable_cache(
     async () => {
       await connectToDatabase();
-      const product = await Product.findOne({ slug, isPublished: true })
+      if (!Brand) {}
+      const decodedSlug = decodeURIComponent(slug);
+      const isObjId = /^[0-9a-fA-F]{24}$/.test(decodedSlug);
+      const slugCondition = isObjId
+        ? { $or: [{ slug: decodedSlug }, { slug }, { _id: decodedSlug }] }
+        : { $or: [{ slug: decodedSlug }, { slug }] };
+      const product = await Product.findOne({
+        $and: [
+          slugCondition,
+          { isPublished: { $ne: false } },
+        ],
+      })
+        .select('-embedding')
         .populate('categories')
+        .populate('brand')
         .lean();
       return serialize(product);
     },
-    ['product-detail', slug],
+    ['product-detail-v2', slug],
     { revalidate: 31536000, tags: [CACHE_TAGS.products] }
   )();
 };
@@ -78,8 +95,11 @@ export const getTrendingProducts = (limit = 10) => {
 
       let trendingProducts = await Product.find({
         _id: { $in: topSellingIds },
-        isPublished: true,
-      }).populate('categories').lean();
+        isPublished: { $ne: false },
+      })
+        .select('-embedding -description -batches -variants.batches -attributes -showroomStocks')
+        .populate('categories', 'name slug parentCategory isActive')
+        .lean();
 
       // Ensure they are in the order of totalSales
       trendingProducts.sort((a: any, b: any) => {
@@ -93,10 +113,11 @@ export const getTrendingProducts = (limit = 10) => {
         const remaining = limit - trendingProducts.length;
         const topRated = await Product.find({
           _id: { $nin: trendingProducts.map(p => p._id) },
-          isPublished: true,
+          isPublished: { $ne: false },
           ratings: { $gt: 0 }
         })
-          .populate('categories')
+          .select('-embedding -description -batches -variants.batches -attributes -showroomStocks')
+          .populate('categories', 'name slug parentCategory isActive')
           .sort({ ratings: -1, numReviews: -1 } as any)
           .limit(remaining)
           .lean();
@@ -108,10 +129,11 @@ export const getTrendingProducts = (limit = 10) => {
         const remaining = limit - trendingProducts.length;
         const topViewed = await Product.find({
           _id: { $nin: trendingProducts.map(p => p._id) },
-          isPublished: true,
+          isPublished: { $ne: false },
           views: { $gt: 0 }
         })
-          .populate('categories')
+          .select('-embedding -description -batches -variants.batches -attributes -showroomStocks')
+          .populate('categories', 'name slug parentCategory isActive')
           .sort({ views: -1 } as any)
           .limit(remaining)
           .lean();
@@ -123,9 +145,10 @@ export const getTrendingProducts = (limit = 10) => {
         const remaining = limit - trendingProducts.length;
         const latest = await Product.find({
           _id: { $nin: trendingProducts.map(p => p._id) },
-          isPublished: true,
+          isPublished: { $ne: false },
         })
-          .populate('categories')
+          .select('-embedding -description -batches -variants.batches -attributes -showroomStocks')
+          .populate('categories', 'name slug parentCategory isActive')
           .sort({ createdAt: -1 } as any)
           .limit(remaining)
           .lean();
@@ -134,7 +157,7 @@ export const getTrendingProducts = (limit = 10) => {
 
       return serialize(trendingProducts);
     },
-    ['trending-products', limit.toString()],
+    ['trending-products-v2', limit.toString()],
     { revalidate: 3600, tags: [CACHE_TAGS.products] }
   )();
 };
