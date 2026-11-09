@@ -171,9 +171,9 @@ export async function POST(req: NextRequest) {
           isPublished: isPublished !== undefined ? isPublished : true,
         });
 
-        revalidateTag('products', { expire: 0 });
-        revalidatePath('/');
-        revalidatePath('/shop');
+        revalidateTag('products', 'max');
+        revalidatePath('/', 'layout');
+        revalidatePath('/shop', 'page');
         return NextResponse.json(newProduct, { status: 201 });
       } catch (error: any) {
         lastError = error;

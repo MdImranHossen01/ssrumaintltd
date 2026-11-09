@@ -141,9 +141,9 @@ export async function PUT(
             return NextResponse.json({ message: 'Product not found' }, { status: 404 });
           }
 
-          revalidateTag(CACHE_TAGS.products, { expire: 0 });
-          revalidatePath('/');
-          revalidatePath('/shop');
+          revalidateTag(CACHE_TAGS.products, 'max');
+          revalidatePath('/', 'layout');
+          revalidatePath('/shop', 'page');
           return NextResponse.json(updatedProduct);
         } catch (error: any) {
           lastError = error;
@@ -174,9 +174,9 @@ export async function PUT(
       return NextResponse.json({ message: 'Product not found' }, { status: 404 });
     }
 
-    revalidateTag('products', { expire: 0 });
-    revalidatePath('/');
-    revalidatePath('/shop');
+    revalidateTag(CACHE_TAGS.products, 'max');
+    revalidatePath('/', 'layout');
+    revalidatePath('/shop', 'page');
 
     return NextResponse.json(updatedProduct);
   } catch (error) {
@@ -235,9 +235,9 @@ export async function DELETE(
 
 
     try {
-      revalidateTag(CACHE_TAGS.products, { expire: 0 });
-      revalidatePath('/');
-      revalidatePath('/shop');
+      revalidateTag(CACHE_TAGS.products, 'max');
+      revalidatePath('/', 'layout');
+      revalidatePath('/shop', 'page');
     } catch (revalidateError) {
       console.error('Failed to revalidate product tags:', revalidateError);
     }

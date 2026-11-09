@@ -26,6 +26,33 @@ export const CACHE_TAGS = {
   coupons: 'coupons',
 };
 
+// Helper to sanitize variant prices so root products don't leak obsolete/invalid discounts
+function sanitizeProductPrices(p: any) {
+  if (!p) return p;
+  if (p.variants && p.variants.length > 0) {
+    const firstVariant = p.variants[0];
+    if (firstVariant && firstVariant.price !== undefined && firstVariant.price !== null) {
+      p.price = Number(firstVariant.price);
+    }
+    const varSale = firstVariant?.salePrice;
+    if (varSale !== undefined && varSale !== null && Number(varSale) > 0 && Number(varSale) < Number(p.price)) {
+      p.salePrice = Number(varSale);
+      p.discountRate = Math.round((1 - Number(varSale) / Number(p.price)) * 100);
+    } else {
+      delete p.salePrice;
+      delete p.discountRate;
+    }
+  } else {
+    if (p.salePrice !== undefined && p.salePrice !== null) {
+      if (Number(p.salePrice) <= 0 || (p.price && Number(p.salePrice) >= Number(p.price))) {
+        delete p.salePrice;
+        delete p.discountRate;
+      }
+    }
+  }
+  return p;
+}
+
 // --- PRODUCTS ---
 
 export const getCachedProducts = (query = {}, limit = 10, sort: any = { createdAt: -1 }) => {
@@ -40,7 +67,7 @@ export const getCachedProducts = (query = {}, limit = 10, sort: any = { createdA
         .sort(sort as any)
         .limit(limit)
         .lean();
-      return serialize(products);
+      return serialize(products).map(sanitizeProductPrices);
     },
     ['products-list-v2', JSON.stringify(query), limit.toString(), JSON.stringify(sort)],
     { revalidate: 31536000, tags: [CACHE_TAGS.products] }
@@ -67,7 +94,7 @@ export const getCachedProductBySlug = (slug: string) => {
         .populate('categories')
         .populate('brand')
         .lean();
-      return serialize(product);
+      return sanitizeProductPrices(serialize(product));
     },
     ['product-detail-v2', slug],
     { revalidate: 31536000, tags: [CACHE_TAGS.products] }
@@ -155,7 +182,7 @@ export const getTrendingProducts = (limit = 10) => {
         trendingProducts = [...trendingProducts, ...latest] as any;
       }
 
-      return serialize(trendingProducts);
+      return serialize(trendingProducts).map(sanitizeProductPrices);
     },
     ['trending-products-v2', limit.toString()],
     { revalidate: 3600, tags: [CACHE_TAGS.products] }

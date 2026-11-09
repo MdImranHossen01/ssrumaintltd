@@ -104,7 +104,11 @@ export default function ProductDetailsV3Client({ product }: ProductDetailsV3Clie
   const currentVariant = activeVariant || defaultVariant;
 
   const displayPrice = hasVariants ? (currentVariant?.price ?? 0) : product.price;
-  const displaySalePrice = hasVariants ? currentVariant?.salePrice : product.salePrice;
+  const rawSalePrice = hasVariants
+    ? (currentVariant?.salePrice !== undefined && currentVariant?.salePrice !== null ? Number(currentVariant.salePrice) : undefined)
+    : (product.salePrice !== undefined && product.salePrice !== null ? Number(product.salePrice) : undefined);
+  const hasDiscount = Boolean(rawSalePrice && displayPrice && Number(rawSalePrice) > 0 && Number(rawSalePrice) < Number(displayPrice));
+  const displaySalePrice = hasDiscount ? Number(rawSalePrice) : undefined;
   const displayStock = hasVariants ? (currentVariant?.stock ?? 0) : (product.stock ?? 0);
 
   const handleAddToCart = () => {

@@ -110,17 +110,19 @@ export function ProductForm({ initialData }: ProductFormProps) {
     return Math.round((1 - salePrice / price) * 100);
   };
 
+  const initialHasVariants = Boolean(initialData?.variants && initialData.variants.length > 0);
+
   const defaultValues: ProductFormValues = {
     name: initialData?.name || '',
     slug: initialData?.slug || '',
     description: initialData?.description || '',
-    price: initialData?.price ?? '',
-    purchasePrice: initialData?.purchasePrice ?? '',
+    price: initialHasVariants ? '' : (initialData?.price ?? ''),
+    purchasePrice: initialHasVariants ? '' : (initialData?.purchasePrice ?? ''),
     discountRate: calculateDiscount(initialData?.price, initialData?.salePrice) || '',
-    salePrice: initialData?.salePrice ?? '',
-    wholesaleSalePrice: initialData?.wholesaleSalePrice ?? '',
+    salePrice: initialHasVariants ? '' : (initialData?.salePrice ?? ''),
+    wholesaleSalePrice: initialHasVariants ? '' : (initialData?.wholesaleSalePrice ?? ''),
     sku: initialData?.sku || '',
-    stock: initialData?.stock ?? '',
+    stock: initialHasVariants ? '' : (initialData?.stock ?? ''),
     categories: initialData?.categories?.map((c: any) => typeof c === 'object' ? c._id : c) || [],
     images: initialData?.images || [],
     isPublished: initialData?.isPublished ?? true,
@@ -128,7 +130,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
     isNewArrival: initialData?.isNewArrival ?? false,
     isFlashSale: initialData?.isFlashSale ?? false,
     brand: initialData?.brand?._id || initialData?.brand || '',
-    showroomPrice: initialData?.showroomPrice ?? '',
+    showroomPrice: initialHasVariants ? '' : (initialData?.showroomPrice ?? ''),
     batchNumber: initialData?.batches?.[0]?.batchNumber || '',
     expiryDate: (() => {
       if (!initialData?.batches?.[0]?.expiryDate) return '';
@@ -197,6 +199,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
     control: form.control,
     name: "variants"
   });
+
+  const hasVariants = variantFields.length > 0;
 
   // Generation tool removed as variants are now managed directly
 
@@ -457,6 +461,44 @@ export function ProductForm({ initialData }: ProductFormProps) {
                   )}
                 />
               </div>
+              {/* Batch & Expiry Tracking (Independent of Variants) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="batchNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-1.5">
+                        Batch Number
+                        <span className="text-[11px] font-normal text-muted-foreground">(Optional)</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. BATCH-001" {...field} value={field.value || ''} />
+                      </FormControl>
+                      <FormDescription className="text-xs">Identify the inventory batch</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="expiryDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-1.5">
+                        Expiry Date
+                        <span className="text-[11px] font-normal text-muted-foreground">(Optional)</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} value={field.value || ''} />
+                      </FormControl>
+                      <FormDescription className="text-xs">Product batch expiration date</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <FormField
                 control={form.control}
                 name="description"
@@ -490,6 +532,17 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
           <Card>
             <CardContent className="pt-6 space-y-4">
+              {hasVariants && (
+                <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-xs space-y-1 text-amber-800 dark:text-amber-300">
+                  <p className="font-bold flex items-center gap-1.5">
+                    <span className="inline-block w-4 h-4 rounded-full bg-amber-500 text-white text-[11px] text-center font-bold">i</span>
+                    ভ্যারিয়েন্ট সক্রিয় (Variants Active):
+                  </p>
+                  <p className="text-muted-foreground pl-5.5">
+                    প্রোডাক্টটিতে কালার/সাইজ ভ্যারিয়েন্ট থাকায় প্রতিটি কালারের নিজস্ব ছবি নিচের <strong>Variation Manager</strong> সেকশনে আপলোড করুন। ভ্যারিয়েন্ট থাকলে মূল গ্যালারি ছবির প্রয়োজন নেই।
+                  </p>
+                </div>
+              )}
               <div className="flex flex-col gap-1">
                 <Label>{t("products.form.gallery_images")}</Label>
                 <p className="text-xs text-muted-foreground">
@@ -591,7 +644,18 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 variant="outline"
                 size="sm"
                 className="w-full sm:w-auto bg-background hover:bg-primary hover:text-white transition-all border-primary/20 shrink-0"
-                onClick={() => appendVariant({ color: '', images: [], sizes: [{ size: '', price: form.getValues('price') || '', stock: '', sku: '' }] })}
+                onClick={() => {
+                  if (variantFields.length === 0) {
+                    form.setValue('price', '' as any);
+                    form.setValue('salePrice', '' as any);
+                    form.setValue('discountRate', undefined as any);
+                    form.setValue('stock', '' as any);
+                    form.setValue('purchasePrice', '' as any);
+                    form.setValue('showroomPrice', '' as any);
+                    form.setValue('wholesaleSalePrice', '' as any);
+                  }
+                  appendVariant({ color: '', images: [], sizes: [{ size: '', price: form.getValues('price') || '', stock: '', sku: '' }] });
+                }}
               >
                 <Plus className="mr-2 h-4 w-4" /> {t("products.form.add_color_variant")}
               </Button>
@@ -842,212 +906,216 @@ export function ProductForm({ initialData }: ProductFormProps) {
               )}
             </CardContent>
           </Card>
-          <Card>
+          <Card className={hasVariants ? "border-dashed bg-muted/20" : ""}>
             <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="purchasePrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("products.form.purchase_price_tk")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="0.00"
-                          {...field}
-                          value={field.value ?? ''}
-                          onChange={(e) => {
-                            const value = e.target.value === '' ? '' : (parseFloat(e.target.value) || 0);
-                            field.onChange(value);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="showroomPrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Showroom Price (Tk)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="0.00"
-                          {...field}
-                          value={field.value ?? ''}
-                          onChange={(e) => {
-                            const value = e.target.value === '' ? '' : (parseFloat(e.target.value) || 0);
-                            field.onChange(value);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="wholesaleSalePrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("products.form.wholesale_price_tk")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="0.00"
-                          {...field}
-                          value={field.value ?? ''}
-                          onChange={(e) => {
-                            const value = e.target.value === '' ? '' : (parseFloat(e.target.value) || 0);
-                            field.onChange(value);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="salePrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("products.form.sale_price_tk")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="0.00"
-                          {...field}
-                          value={field.value || ''}
-                          onChange={(e) => {
-                            const sale = e.target.value === '' ? '' : (parseFloat(e.target.value) || 0);
-                            field.onChange(sale);
-                            const price = form.getValues('price') || 0;
-                            if (price > 0 && sale !== '' && sale > 0 && sale < price) {
-                              const newDiscount = Math.round((1 - sale / price) * 100);
-                              form.setValue('discountRate', newDiscount);
-                            } else {
-                              form.setValue('discountRate', undefined);
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("products.form.regular_price_tk")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="0.00"
-                          {...field}
-                          value={field.value ?? ''}
-                          onChange={(e) => {
-                            const value = e.target.value === '' ? '' : (parseFloat(e.target.value) || 0);
-                            field.onChange(value);
-                            // Sync sale price if discount exists
-                            const prc = value === '' ? 0 : value;
-                            const discount = form.getValues('discountRate') || 0;
-                            if (discount > 0 && prc > 0) {
-                              const newSale = prc * (1 - discount / 100);
-                              form.setValue('salePrice', Math.round(newSale));
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="discountRate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("products.form.discount_percent")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          {...field}
-                          value={field.value || ''}
-                          onChange={(e) => {
-                            const discount = e.target.value === '' ? undefined : (parseFloat(e.target.value) || 0);
-                            field.onChange(discount);
-                            const price = form.getValues('price') || 0;
-                            if (price > 0 && discount !== undefined) {
-                              const newSale = price * (1 - discount / 100);
-                              form.setValue('salePrice', Math.round(newSale));
-                            } else {
-                              form.setValue('salePrice', undefined);
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <FormField
-                  control={form.control}
-                  name="stock"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("products.form.total_stock_quantity")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          {...field}
-                          value={field.value ?? ''}
-                          onChange={(e) => field.onChange(e.target.value === '' ? '' : (parseInt(e.target.value) || 0))}
-                        />
-                      </FormControl>
-                      <FormDescription>{t("products.form.physical_stock")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="batchNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Batch Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. BATCH-001" {...field} />
-                      </FormControl>
-                      <FormDescription>Identify the inventory batch</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="expiryDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Expiry Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormDescription>Product batch expiration date</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              {hasVariants && (
+                <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs sm:text-sm leading-relaxed space-y-1">
+                  <p className="font-bold flex items-center gap-1.5">
+                    <span className="inline-block w-4 h-4 rounded-full bg-amber-500 text-white text-[11px] text-center font-bold">i</span>
+                    মূল প্রাইসিং ও স্টক সেকশন বন্ধ (Variants Active — Cleaned & Disabled)
+                  </p>
+                  <p className="text-muted-foreground pl-5.5">
+                    যেহেতু প্রোডাক্টটিতে কালার/সাইজ ভ্যারিয়েন্ট যুক্ত করা হয়েছে, তাই মূল প্রাইসিং ও স্টক সেকশনটি সম্পূর্ণ মুছে লক করা হয়েছে। প্রতিটি সাইজ/ভ্যারিয়েন্টের মূল্য, ডিসকাউন্ট এবং স্টক উপরের Product Variants সেকশনে নির্ধারণ করুন। ১ম ভ্যারিয়েন্টের মূল্যই মূল প্রোডাক্ট কার্ড ও কুইক ভিউতে ব্যবহৃত হবে।
+                  </p>
+                </div>
+              )}
+              <div className={hasVariants ? "opacity-50 pointer-events-none select-none" : ""}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t("products.form.regular_price_tk")}
+                          {hasVariants && <span className="ml-1 text-xs font-normal text-muted-foreground">(Locked - Driven by variants)</span>}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder={hasVariants ? "Disabled" : "0.00"}
+                            disabled={hasVariants}
+                            {...field}
+                            value={hasVariants ? '' : (field.value ?? '')}
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? '' : (parseFloat(e.target.value) || 0);
+                              field.onChange(value);
+                              const prc = value === '' ? 0 : value;
+                              const discount = form.getValues('discountRate') || 0;
+                              if (discount > 0 && prc > 0) {
+                                const newSale = prc * (1 - discount / 100);
+                                form.setValue('salePrice', Math.round(newSale));
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="purchasePrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("products.form.purchase_price_tk")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder={hasVariants ? "Disabled" : "0.00"}
+                            disabled={hasVariants}
+                            {...field}
+                            value={hasVariants ? '' : (field.value ?? '')}
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? '' : (parseFloat(e.target.value) || 0);
+                              field.onChange(value);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="discountRate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("products.form.discount_percent")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder={hasVariants ? "Disabled" : (!(Number(form.watch('price')) > 0) ? '-' : '0')}
+                            disabled={hasVariants || !(Number(form.watch('price')) > 0)}
+                            className="disabled:opacity-50 disabled:cursor-not-allowed"
+                            {...field}
+                            value={hasVariants ? '' : (field.value || '')}
+                            onChange={(e) => {
+                              const discount = e.target.value === '' ? undefined : (parseFloat(e.target.value) || 0);
+                              field.onChange(discount);
+                              const price = form.getValues('price') || 0;
+                              if (price > 0 && discount !== undefined) {
+                                const newSale = price * (1 - discount / 100);
+                                form.setValue('salePrice', Math.round(newSale));
+                              } else {
+                                form.setValue('salePrice', undefined);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="salePrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("products.form.sale_price_tk")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder={hasVariants ? "Disabled" : (!(Number(form.watch('price')) > 0) ? '-' : '0.00')}
+                            disabled={hasVariants || !(Number(form.watch('price')) > 0)}
+                            className="disabled:opacity-50 disabled:cursor-not-allowed"
+                            {...field}
+                            value={hasVariants ? '' : (field.value || '')}
+                            onChange={(e) => {
+                              const rawVal = e.target.value;
+                              const price = form.getValues('price') || 0;
+                              if (rawVal === '') {
+                                field.onChange('');
+                                form.setValue('discountRate', undefined);
+                                return;
+                              }
+                              let sale = parseFloat(rawVal) || 0;
+                              if (price > 0 && sale > price) {
+                                sale = price;
+                              }
+                              field.onChange(sale);
+                              if (price > 0 && sale > 0 && sale < price) {
+                                form.setValue('discountRate', Math.round((1 - sale / price) * 100));
+                              } else {
+                                form.setValue('discountRate', undefined);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="showroomPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Showroom Price (Tk)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder={hasVariants ? "Disabled" : "0.00"}
+                            disabled={hasVariants}
+                            {...field}
+                            value={hasVariants ? '' : (field.value ?? '')}
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? '' : (parseFloat(e.target.value) || 0);
+                              field.onChange(value);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="wholesaleSalePrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("products.form.wholesale_price_tk")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder={hasVariants ? "Disabled" : "0.00"}
+                            disabled={hasVariants}
+                            {...field}
+                            value={hasVariants ? '' : (field.value ?? '')}
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? '' : (parseFloat(e.target.value) || 0);
+                              field.onChange(value);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="mt-6 max-w-sm">
+                  <FormField
+                    control={form.control}
+                    name="stock"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("products.form.total_stock_quantity")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder={hasVariants ? "Disabled" : "0"}
+                            disabled={hasVariants}
+                            {...field}
+                            value={hasVariants ? '' : (field.value ?? '')}
+                            onChange={(e) => field.onChange(e.target.value === '' ? '' : (parseInt(e.target.value) || 0))}
+                          />
+                        </FormControl>
+                        <FormDescription>{t("products.form.physical_stock")}</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
