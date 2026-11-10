@@ -5,6 +5,7 @@ import Product from '@/models/Product';
 import { auth } from '@/auth';
 import { slugify } from '@/lib/slugify';
 import { generateUniqueSlug } from '@/lib/slugify-server';
+import { purgeCloudflareCache } from '@/lib/cloudflareCache';
 
 // GET all products
 export async function GET(req: NextRequest) {
@@ -174,6 +175,7 @@ export async function POST(req: NextRequest) {
         revalidateTag('products', 'max');
         revalidatePath('/', 'layout');
         revalidatePath('/shop', 'page');
+        purgeCloudflareCache().catch(() => {});
         return NextResponse.json(newProduct, { status: 201 });
       } catch (error: any) {
         lastError = error;

@@ -3,6 +3,7 @@ import connectToDatabase from '@/lib/db';
 import Banner from '@/models/Banner';
 import { auth } from '@/auth';
 import mongoose from 'mongoose';
+import { purgeCloudflareCache } from '@/lib/cloudflareCache';
 
 export async function PUT(
   req: NextRequest,
@@ -28,6 +29,7 @@ export async function PUT(
       return NextResponse.json({ message: 'Banner not found' }, { status: 404 });
     }
 
+    purgeCloudflareCache().catch(() => {});
     return NextResponse.json(banner);
   } catch (error) {
     console.error('Update Banner Error:', error);
@@ -58,6 +60,7 @@ export async function DELETE(
       return NextResponse.json({ message: 'Banner not found' }, { status: 404 });
     }
 
+    purgeCloudflareCache().catch(() => {});
     return NextResponse.json({ message: 'Banner deleted successfully' });
   } catch (error) {
     console.error('Delete Banner Error:', error);

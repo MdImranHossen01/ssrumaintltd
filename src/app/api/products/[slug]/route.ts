@@ -7,6 +7,7 @@ import Product from '@/models/Product';
 import { auth } from '@/auth';
 import { generateUniqueSlug } from '@/lib/slugify-server';
 import { CACHE_TAGS } from '@/lib/data-fetching';
+import { purgeCloudflareCache } from '@/lib/cloudflareCache';
 
 // GET a single product
 export async function GET(
@@ -144,6 +145,7 @@ export async function PUT(
           revalidateTag(CACHE_TAGS.products, 'max');
           revalidatePath('/', 'layout');
           revalidatePath('/shop', 'page');
+          purgeCloudflareCache().catch(() => {});
           return NextResponse.json(updatedProduct);
         } catch (error: any) {
           lastError = error;
@@ -177,6 +179,7 @@ export async function PUT(
     revalidateTag(CACHE_TAGS.products, 'max');
     revalidatePath('/', 'layout');
     revalidatePath('/shop', 'page');
+    purgeCloudflareCache().catch(() => {});
 
     return NextResponse.json(updatedProduct);
   } catch (error) {
@@ -238,6 +241,7 @@ export async function DELETE(
       revalidateTag(CACHE_TAGS.products, 'max');
       revalidatePath('/', 'layout');
       revalidatePath('/shop', 'page');
+    purgeCloudflareCache().catch(() => {});
     } catch (revalidateError) {
       console.error('Failed to revalidate product tags:', revalidateError);
     }
