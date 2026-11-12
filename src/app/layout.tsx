@@ -134,6 +134,9 @@ export async function generateMetadata(): Promise<Metadata> {
         ...(settings.facebookDomainVerification
           ? { "facebook-domain-verification": settings.facebookDomainVerification }
           : {}),
+        ...(settings.tiktokDomainVerification
+          ? { "tiktok-developers-site-verification": settings.tiktokDomainVerification }
+          : {}),
       },
     };
   } catch (error) {

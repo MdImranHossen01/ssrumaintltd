@@ -64,12 +64,24 @@ export async function POST(request: NextRequest) {
 
         // Construct TikTok contents format
         const rawContents = Array.isArray(customData.contents) ? customData.contents : [];
-        const contents = rawContents.map((i: any) => ({
-            content_id: String(i.id || i.product || ''),
+        let contents = rawContents.map((i: any) => ({
+            content_id: String(i.content_id || i.id || i.product || ''),
             price: Number(i.item_price || i.price || 0),
             quantity: Number(i.quantity || 1),
-            content_name: i.name || undefined,
+            content_name: i.content_name || i.name || undefined,
         }));
+
+        if (contents.length === 0) {
+            const fallbackId = customData.content_id || (Array.isArray(customData.content_ids) && customData.content_ids[0]);
+            if (fallbackId) {
+                contents = [{
+                    content_id: String(fallbackId),
+                    price: Number(customData.value || 0),
+                    quantity: 1,
+                    content_name: customData.content_name || undefined,
+                }];
+            }
+        }
 
         const payload: any = {
             pixel_code: pixelId,
@@ -90,6 +102,7 @@ export async function POST(request: NextRequest) {
                 content_type: customData.content_type || 'product',
                 ...(contents.length > 0 && { contents }),
             },
+            ...(settings?.tiktokTestEventCode?.trim() && { test_event_code: settings.tiktokTestEventCode.trim() }),
         };
 
         const response = await fetch(

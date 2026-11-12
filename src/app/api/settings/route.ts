@@ -116,6 +116,8 @@ export async function POST(req: NextRequest) {
       'facebookTestEventCode',
       'tiktokPixelId',
       'tiktokAccessToken',
+      'tiktokDomainVerification',
+      'tiktokTestEventCode',
       'googleTagManagerId',
       'aiConfig'
     ];
