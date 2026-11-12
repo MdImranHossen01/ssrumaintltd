@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { filename, contentType, folder = 'products' } = body;
+    const { filename, contentType, folder = 'products', fileSize } = body;
 
     if (!filename || !contentType) {
       return NextResponse.json(
@@ -37,17 +37,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const isBanner = folder === 'banners' || folder.includes('banner') || folder.includes('hero');
+    const maxAllowedBytes = isBanner ? 400 * 1024 : 150 * 1024;
+    if (typeof fileSize !== 'number' || fileSize <= 0 || fileSize > maxAllowedBytes) {
+      return NextResponse.json(
+        { message: 'File requires server-side Sharp optimization.' },
+        { status: 400 }
+      );
+    }
+
     const allowedTypes = [
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
       'image/webp',
       'image/gif',
       'image/svg+xml',
     ];
     if (!allowedTypes.includes(contentType.toLowerCase())) {
       return NextResponse.json(
-        { message: 'Invalid file type. Only image files are allowed.' },
+        { message: 'Only optimized WebP, GIF, or SVG files can use direct presigned upload.' },
         { status: 400 }
       );
     }
@@ -62,6 +68,7 @@ export async function POST(req: NextRequest) {
       Bucket: R2_BUCKET_NAME,
       Key: fileKey,
       ContentType: contentType,
+      ContentLength: Number(fileSize),
     });
 
     const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 300 });
