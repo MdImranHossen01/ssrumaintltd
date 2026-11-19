@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     };
 
     const banner = await Banner.create(whitelistedBanner);
-    purgeCloudflareCache().catch(() => {});
+    await purgeCloudflareCache().catch(() => {});
     return NextResponse.json(banner, { status: 201 });
   } catch (error) {
     console.error('Create Banner Error:', error);
