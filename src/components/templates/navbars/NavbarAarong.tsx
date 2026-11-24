@@ -76,7 +76,9 @@ export default function NavbarAarong() {
   const wishlistCount = wishlistItems.length;
   const settings = useSettings();
 
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>(() =>
+    Array.isArray(settings?.categories) ? settings.categories.filter((c: any) => c.isActive) : []
+  );
   const [profile, setProfile] = useState<any>(null);
 
   // Monitor scroll for sticky style transitions with rock-solid hysteresis
@@ -104,6 +106,7 @@ export default function NavbarAarong() {
   useEffect(() => {
     const controller = new AbortController();
     async function fetchCats() {
+      if (Array.isArray(settings?.categories)) { setCategories(settings.categories.filter((c: any) => c.isActive)); return; }
       try {
         const res = await fetch('/api/categories', { signal: controller.signal });
         if (res.ok) {
