@@ -16,6 +16,8 @@ import ProjectsSection from '@/components/corporate/ProjectsSection';
 import TransformationSection from '@/components/corporate/TransformationSection';
 import TestimonialsSection from '@/components/corporate/TestimonialsSection';
 
+export const revalidate = 31536000;
+
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getCachedSettings();
   const brandName = settings?.brandName || 'SS Ruma International Ltd';
