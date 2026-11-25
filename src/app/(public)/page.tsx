@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Metadata } from 'next';
-import { headers } from 'next/headers';
 import { getCachedSettings, getCachedFAQs } from '@/lib/data-fetching';
 
 import { SyncedHeroSection } from '@/components/storefront/SyncedHeroSection';
@@ -23,10 +22,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const metaTitle = settings?.metaTitle || brandName;
   const description = settings?.metaDescription || 'Your Trusted Partner in Construction, International Trade, Import & Export, Business Consultancy and Global Solutions.';
 
-  const headersList = await headers();
-  const hostname = headersList.get('host') || 'localhost';
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-  const baseUrl = `${protocol}://${hostname}`;
+  const rawSiteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXTAUTH_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : 'http://localhost:3000');
+  const baseUrl = rawSiteUrl.startsWith('http') ? rawSiteUrl : `https://${rawSiteUrl}`;
 
   return {
     title: {
