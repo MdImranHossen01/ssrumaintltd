@@ -61,7 +61,7 @@ export function FAQSection({ faqs: dynamicFaqs }: { faqs?: FAQItem[] }) {
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
                     {/* Left: Lottie Animation */}
                     <div className="relative flex flex-col items-center lg:sticky lg:top-8">
-                        <div className="relative w-full max-w-sm mx-auto">
+                        <div className="relative w-full max-w-sm mx-auto min-h-[320px] flex items-center justify-center">
                             <Lottie
                                 animationData={faqAnimation}
                                 loop={true}

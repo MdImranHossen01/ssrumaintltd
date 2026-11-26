@@ -35,7 +35,7 @@ import { useSettings } from '@/components/SettingsProvider';
 
 
 const navItems = [
-  { href: '/#home', label: 'Home' },
+  { href: '/', label: 'Home' },
   { href: '/shop', label: 'Shop' },
   { href: '/services', label: 'Services' },
   { href: '/team', label: 'Team' },
@@ -235,7 +235,7 @@ export default function Navbar() {
                     <Logo onClick={() => setOpen(false)} />
                     <div className="space-y-3 pt-4 border-t font-medium tracking-tight">
                       {navItems.map((item) => {
-                        const isActive = pathname === item.href || (item.href === '/#home' && pathname === '/');
+                        const isActive = pathname === item.href;
                         return (
                           <Link
                             key={item.href}
@@ -269,7 +269,7 @@ export default function Navbar() {
             <nav className="hidden md:flex md:flex-1 justify-center items-center">
               <ul className="flex items-center gap-3 lg:gap-4">
                 {navItems.map((item) => {
-                  const isActive = pathname === item.href || (item.href === '/#home' && pathname === '/');
+                  const isActive = pathname === item.href;
                   return (
                     <li key={item.href} className="flex items-center">
                       <Link
