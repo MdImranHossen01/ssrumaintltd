@@ -27,6 +27,7 @@
     @apply antialiased;
     overflow-x: clip;
     max-width: 100vw;
+    scroll-behavior: smooth;
   }
 
   button, 
