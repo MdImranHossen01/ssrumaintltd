@@ -493,7 +493,7 @@ function NavMain({ items, pathname, role }: { items: typeof data.navMain; pathna
                     {item.items.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton
-                          render={<Link href={subItem.url} onClick={(e) => handleItemClick(e, subItem.url)} />}
+                          render={<Link prefetch={false} href={subItem.url} onClick={(e) => handleItemClick(e, subItem.url)} />}
                           isActive={
                             pathname === subItem.url ||
                             (subItem.url !== "#" &&
