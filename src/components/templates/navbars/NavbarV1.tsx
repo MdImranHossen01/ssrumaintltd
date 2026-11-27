@@ -323,13 +323,13 @@ export default function Navbar() {
                       {(session.user as any)?.role === 'super_admin' && (
                         <>
                           <DropdownMenuItem asChild>
-                            <Link href="/admin/dashboard" className="flex items-center w-full cursor-pointer">
+                            <Link prefetch={false} href="/admin/dashboard" className="flex items-center w-full cursor-pointer">
                               <LayoutDashboard className="mr-2 h-4 w-4" />
                               <span>Admin Dashboard</span>
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link href="/admin/system-design" className="flex items-center w-full cursor-pointer">
+                            <Link prefetch={false} href="/admin/system-design" className="flex items-center w-full cursor-pointer">
                               <Settings className="mr-2 h-4 w-4" />
                               <span>Infrastructure & Marketing</span>
                             </Link>
@@ -339,13 +339,13 @@ export default function Navbar() {
                       {(session.user as any)?.role === 'admin' && (
                         <>
                           <DropdownMenuItem asChild>
-                            <Link href="/admin/dashboard" className="flex items-center w-full cursor-pointer">
+                            <Link prefetch={false} href="/admin/dashboard" className="flex items-center w-full cursor-pointer">
                               <LayoutDashboard className="mr-2 h-4 w-4" />
                               <span>Admin Dashboard</span>
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link href="/admin/orders" className="flex items-center w-full cursor-pointer">
+                            <Link prefetch={false} href="/admin/orders" className="flex items-center w-full cursor-pointer">
                               <Truck className="mr-2 h-4 w-4" />
                               <span>Manage Orders</span>
                             </Link>
@@ -354,7 +354,7 @@ export default function Navbar() {
                       )}
                       {(!session.user || ((session.user as any)?.role !== 'super_admin' && (session.user as any)?.role !== 'admin')) && (
                         <DropdownMenuItem asChild>
-                          <Link href="/dashboard" className="flex items-center w-full cursor-pointer">
+                          <Link prefetch={false} href="/dashboard" className="flex items-center w-full cursor-pointer">
                             <LayoutDashboard className="mr-2 h-4 w-4" />
                             <span>Dashboard</span>
                           </Link>
@@ -373,7 +373,7 @@ export default function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Link
+                <Link prefetch={false}
                   href="/login"
                   className="text-[12px] font-bold uppercase tracking-[0.12em] text-white bg-primary hover:bg-primary/90 px-4 py-1.5 rounded-full shadow-md shadow-primary/20 transition-all"
                 >
